@@ -6,6 +6,8 @@ from objects import*
 
 def main():
     s = str(input('Data or plot? '))
+    if s == 'plot':
+        b = str(input('Number of years, velocity or ratio? '))
     if s == 'data':
         wb = openpyxl.Workbook()
         wb['Sheet'].title = "Sheet1"
@@ -36,21 +38,24 @@ def main():
             for j in range(len(K)):
                 for q in range(len(N_int)):
                     bubble = Bubble(G[i], K[j], N_int[q])
-                    r_n = []
-                    r_v = []
-                    r_k = []
-                    for w in range(len(numb)):
-                        r = bubble.r_sw(v0, numb[w], k0)
-                        r_n.append(r)
-                    for w in range(len(v)):
-                        r = bubble.r_sw(v[w], numb0, k0)
-                        r_v.append(r)
-                    for w in range(len(k)):
-                        r = bubble.r_sw(v0, numb0, k[w])
-                        r_k.append(r)
-                    plt.plot(numb, r_n)
-                    plt.plot(v, r_v)
-                    plt.plot(k, r_k)
+                    if b == 'numb':
+                        r_n = []
+                        for w in range(len(numb)):
+                            r = bubble.r_sw(v0, numb[w], k0)
+                            r_n.append(r)
+                        plt.plot(numb, r_n)
+                    elif b == 'vel':
+                        r_v = []
+                        for w in range(len(v)):
+                            r = bubble.r_sw(v[w], numb0, k0)
+                            r_v.append(r)
+                        plt.plot(v, r_v)
+                    elif b == 'ratio':
+                        r_k = []
+                        for w in range(len(k)):
+                            r = bubble.r_sw(v0, numb0, k[w])
+                            r_k.append(r)
+                        plt.plot(k, r_k)
         plt.grid()
         plt.show()
 
