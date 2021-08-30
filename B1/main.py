@@ -6,10 +6,9 @@ from constants import*
 
 def main():
     a = str(input('Data or plot? '))
-    '''
     if a == 'plot':
-        b = str(input('1 or 2? '))
-        '''
+        b = str(input('Velocity or pressure? '))
+
     if a == 'data':
         count = 2
         wb = openpyxl.Workbook()
@@ -26,6 +25,7 @@ def main():
         sh1['I1'].value = 'dv, r = R_s'
         sh1['J1'].value = 'dv, r = R_c'
         sh1['K1'].value = 'R_sw (au), v_int = ' + str(v_int) + ', n = ' + str(n0) + ' years, R_c/R_sw = ' + str(k0)
+        sh1['L1'].value = 'p(lambda_c1)'
         for i in range(len(G)):
             for j in range(len(K)):
                 for q in range(len(N_int)):
@@ -34,7 +34,7 @@ def main():
                     count += 1
         wb.save(file_path)
 
-    elif a == 'plot':
+    elif a == 'plot' and b == 'vel':
         for q in range(len(N_int)):
             for j in range(len(K)):
                 for i in range(len(G)):
@@ -45,9 +45,7 @@ def main():
                     else:
                         plt.plot(lamb, vel, color=Colors[j])
                     if j == 0:
-                        a = []
-                        for e in range(len(lamb)):
-                            a.append((G[i] + 1) / 2 * lamb[e])
+                        a = [(G[i] + 1) / 2 * lamb[e] for e in range(len(lamb))]
                         lamb, a = norm2(G[i], lamb, a)
                         plt.plot(lamb, a, label=Gamma + str(G[i]))
             plt.grid()
@@ -62,10 +60,23 @@ def main():
             plt.ylabel('V')
             plt.title('V(Lambda), ' + N + str(N_int[q]))
             plt.show()
-    '''
-    elif a == 'plot' and b == '2':
-        pass
-        '''
+
+    elif a == 'plot' and b == 'pres':
+        for q in range(len(N_int)):
+            for j in range(len(K)):
+                for i in range(len(G)):
+                    bubble = Bubble(G[i], K[j], N_int[q])
+                    lamb, pres = bubble.solution2()
+                    if i == 0:
+                        plt.plot(lamb, pres, color=Colors[j], label=K_rho + str(K[j]))
+                    else:
+                        plt.plot(lamb, pres, color=Colors[j])
+                    plt.legend()
+                    plt.grid()
+                    plt.xlabel('Lambda')
+                    plt.ylabel('P')
+            plt.title('P(Lambda), ' + N + str(N_int[q]))
+            plt.show()
 
 
 if __name__ == '__main__':

@@ -24,17 +24,27 @@ class Bubble(object):
         return fv, f_rho, fp
 
     # Solutions for the system
-    def solution1(self):
+    def solution(self):
         sol = integrate.solve_ivp(self.solver, (x0, x_k), (v0, rho0, p0),
                                   t_eval=np.linspace(x0, x_k, 1000), method='Radau')
         v, rho, p = sol.y
         lambda_c = sol.t
-        return lambda_c, v
+        return lambda_c, v, p
 
-    # Taking the last elements from the system solutions
-    def solution2(self):
-        lambda_c, v = self.solution1()
+    # Taking the last element for velocity
+    def v_lambda_c(self):
+        lambda_c, v, p = self.solution()
         return lambda_c[-1], v[-1]
+
+    # Taking the last element for pressure
+    def p_lambda_c(self):
+        lambda_c, v, p = self.solution()
+        return lambda_c[-1], p[-1]
+
+    # Extracting the pressure curve
+    def solution2(self):
+        lambda_c, v, p = self.solution()
+        return lambda_c, p
 
     # Function for eta
     def eta(self, k_rho, n_int):
@@ -85,7 +95,7 @@ class Bubble(object):
         sh1['A' + str(count)].value = self.gamma
         sh1['B' + str(count)].value = self.k_rho
         sh1['C' + str(count)].value = self.n_int
-        lamb, vel = self.solution2()
+        lamb, vel = self.v_lambda_c()
         sh1['D' + str(count)].value = lamb
         sh1['E' + str(count)].value = vel
         sh1['F' + str(count)].value = self.v2(self.gamma, lamb)
@@ -95,15 +105,23 @@ class Bubble(object):
         sh1['I' + str(count)].value = self.dv1(self.gamma, self.k_rho, self.n_int)
         sh1['J' + str(count)].value = self.dv2(self.gamma, self.k_rho, self.n_int)
         sh1['K' + str(count)].value = self.r_sw(v_int, n0, k0)
+        lamb, pres = self.p_lambda_c()
+        sh1['L' + str(count)].value = pres
 
-    # Scaling for the ODE curves
+    # Scaling for the velocity curves
     def norm1(self):
-        lamb, vel = self.solution1()
+        lamb, vel, pres = self.solution()
         for t in range(len(lamb)):
             lamb[t] = 1 - (1 - lamb[t]) / (self.gamma - 1)
         for t in range(len(vel)):
             vel[t] = 1 + (vel[t] - 1) / (self.gamma - 1)
         return lamb, vel
+
+    # Pressure on the B2 side
+    def press(self, rho, v):
+        g = self.gamma
+        p = (2/(g + 1)) * ((g + 1)**2/(4*g))**(g/(g-1))*rho*v**2
+        return p
 
 
 # Scaling for the linear slope
