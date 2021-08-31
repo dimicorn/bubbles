@@ -1,8 +1,10 @@
 from scipy import integrate
 import numpy as np
 from constants import*
+from functools import cache
 
 
+# @cache
 class Bubble(object):
     def __init__(self, x, y, z):
         self.gamma = x
@@ -47,7 +49,9 @@ class Bubble(object):
         return lambda_c, p
 
     # Function for eta
-    def eta(self, k_rho, n_int):
+    def eta(self):
+        k_rho = self.k_rho
+        n_int = self.n_int
         x = (2 + n_int) / (5 - k_rho)
         return x
 
@@ -58,20 +62,20 @@ class Bubble(object):
 
     # Approximation using eqn B8a
     def lambda2(self, x, k_rho, n_int):
-        w = self.eta(k_rho, n_int)
+        w = self.eta()
         t = x ** 3 + 12 * x ** 2 + 8 * x + 1 - 0.5 * (x + 1) * (3 * x + 1) * k_rho - (x + 1) * (4 * x + 1) / w
         u = 2 * x ** 3 + 12 * x ** 2 + 7 * x + 1 - 0.5 * (x + 1) * (3 * x + 1) * k_rho - (x + 1) * (4 * x + 1) / w
         return t / u
 
     # Gradient of velocity, r = R_s
     def dv1(self, x, k_rho, n_int):
-        w = self.eta(k_rho, n_int)
+        w = self.eta()
         y = (-(7 * x + 3) + (x + 1) * k_rho + 3 * (x + 1) / w) / (x + 1)
         return y
 
     # Gradient of velocity, r = R_c
     def dv2(self, x, k_rho, n_int):
-        w = self.eta(k_rho, n_int)
+        w = self.eta()
         y = (-2 * (x + 1) + k_rho + 2 / w) / (2 * x / (x + 1))
         return y
 
@@ -107,6 +111,10 @@ class Bubble(object):
         sh1['K' + str(count)].value = self.r_sw(v_int, n0, k0)
         lamb, pres = self.p_lambda_c()
         sh1['L' + str(count)].value = pres
+        sh1['M' + str(count)].value = self.p_sw()
+        sh1['N' + str(count)].value = self.f_psa()
+        sh1['O' + str(count)].value = self.xi()
+        sh1['P' + str(count)].value = self.f_p()
 
     # Scaling for the velocity curves
     def norm1(self):
@@ -118,10 +126,33 @@ class Bubble(object):
         return lamb, vel
 
     # Pressure on the B2 side
-    def press(self, rho, v):
+    def p_sw(self):  # rho, v
         g = self.gamma
-        p = (2/(g + 1)) * ((g + 1)**2/(4*g))**(g/(g-1))*rho*v**2
-        return p
+        f = (2/(g + 1)) * ((g + 1)**2/(4*g))**(g/(g-1))  # *rho*v**2
+        return f
+
+    def f_psa(self):
+        k = self.k_rho
+        g = self.gamma
+        n = self.eta()
+        f = 2 * ((4 - k)*n - 1)/((g+1)*(3-k)*n)
+        return f
+
+    def xi(self):
+        g = self.gamma
+        n_int = self.n_int
+        k = self.k_rho
+        n = self.eta()
+        f_psa = self.f_psa()
+        lambda_c, v = self.v_lambda_c()
+        x = 9*(g - 1)*n_int/((3-k)*n**2*(3*(g-1)*n + n_int)*f_psa*lambda_c**3)
+        return x
+
+    def f_p(self):
+        k = self.k_rho
+        n_int = self.n_int
+        f = (4-k)/(3-k) * (n_int/(1+n_int))
+        return f
 
 
 # Scaling for the linear slope
