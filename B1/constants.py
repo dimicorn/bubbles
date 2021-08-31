@@ -2,13 +2,16 @@
 G = [1.01, 1.05, 1.1, 1.4, 5/3]
 
 # Same for k_rho
-K = [0, 1, 1.5, 2, 2.5]  # 3
+K = [0, 1, 1.5, 2, 2.5, 3]
 
 # And n_int too
 N_int = [0.5, 1, 1.5, 2.5]
 
 # Colors for plot option
 Colors = ['purple', 'blue', 'red', 'green', 'cyan', 'orange']
+
+# Line styles for different n_int
+Line_style = ['solid', 'dashed', 'dashdot', 'dotted']
 
 # Starting and ending values of lambda
 x0 = 1

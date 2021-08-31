@@ -26,10 +26,11 @@ def main():
         sh1['J1'].value = 'dv, r = R_c'
         sh1['K1'].value = 'R_sw (au), v_int = ' + str(v_int) + ', n = ' + str(n0) + ' years, R_c/R_sw = ' + str(k0)
         sh1['L1'].value = 'p(lambda_c1)'
+        '''
         sh1['M1'].value = 'p_sw * rho * v**2'
         sh1['N1'].value = 'f_Psa'
         sh1['O1'].value = '4'+'$/pi /xi$'
-        sh1['P1'].value = 'f_p'
+        sh1['P1'].value = 'f_p'''
         for i in range(len(G)):
             for j in range(len(K)):
                 for q in range(len(N_int)):
@@ -72,10 +73,14 @@ def main():
                     bubble = Bubble(G[i], K[j], N_int[q])
                     lamb, pres = bubble.solution2()
                     if q == 0:
-                        plt.plot(lamb, pres, color=Colors[j], label=K_rho + str(K[j]))
+                        plt.plot(lamb, pres, color=Colors[j], label=K_rho + str(K[j]), linestyle=Line_style[q])
                     else:
-                        plt.plot(lamb, pres, color=Colors[j])
+                        plt.plot(lamb, pres, color=Colors[j], linestyle=Line_style[q])
             plt.grid()
+            plt.plot([], [], 'k-', label=N + str(N_int[0]))
+            plt.plot([], [], 'k--', label=N + str(N_int[1]))
+            plt.plot([], [], 'k-.', label=N + str(N_int[2]))
+            plt.plot([], [], 'k.', label=N + str(N_int[3]))
             plt.xlabel('Lambda')
             plt.ylabel('P')
             plt.title('P(Lambda), ' + Gamma + str(G[i]))

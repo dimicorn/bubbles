@@ -4,7 +4,7 @@ from constants import*
 from functools import cache
 
 
-# @cache
+@cache
 class Bubble(object):
     def __init__(self, x, y, z):
         self.gamma = x
@@ -111,10 +111,11 @@ class Bubble(object):
         sh1['K' + str(count)].value = self.r_sw(v_int, n0, k0)
         lamb, pres = self.p_lambda_c()
         sh1['L' + str(count)].value = pres
+        '''
         sh1['M' + str(count)].value = self.p_sw()
         sh1['N' + str(count)].value = self.f_psa()
         sh1['O' + str(count)].value = self.xi()
-        sh1['P' + str(count)].value = self.f_p()
+        sh1['P' + str(count)].value = self.f_p()'''
 
     # Scaling for the velocity curves
     def norm1(self):
@@ -124,7 +125,7 @@ class Bubble(object):
         for t in range(len(vel)):
             vel[t] = 1 + (vel[t] - 1) / (self.gamma - 1)
         return lamb, vel
-
+    '''
     # Pressure on the B2 side
     def p_sw(self):  # rho, v
         g = self.gamma
@@ -153,6 +154,7 @@ class Bubble(object):
         n_int = self.n_int
         f = (4-k)/(3-k) * (n_int/(1+n_int))
         return f
+    '''
 
 
 # Scaling for the linear slope
