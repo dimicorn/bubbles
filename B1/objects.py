@@ -1,10 +1,8 @@
 from scipy import integrate
 import numpy as np
 from constants import*
-from functools import cache
 
 
-@cache
 class Bubble(object):
     def __init__(self, x, y, z):
         self.gamma = x
@@ -48,6 +46,11 @@ class Bubble(object):
         lambda_c, v, p = self.solution()
         return lambda_c, p
 
+    # Extracting the velocity curve
+    def solution3(self):
+        lambda_c, v, p = self.solution()
+        return lambda_c, v
+
     # Function for eta
     def eta(self):
         k_rho = self.k_rho
@@ -61,20 +64,20 @@ class Bubble(object):
         return z
 
     # Approximation using eqn B8a
-    def lambda2(self, x, k_rho, n_int):
+    def lambda2(self, x, k_rho):
         w = self.eta()
         t = x ** 3 + 12 * x ** 2 + 8 * x + 1 - 0.5 * (x + 1) * (3 * x + 1) * k_rho - (x + 1) * (4 * x + 1) / w
         u = 2 * x ** 3 + 12 * x ** 2 + 7 * x + 1 - 0.5 * (x + 1) * (3 * x + 1) * k_rho - (x + 1) * (4 * x + 1) / w
         return t / u
 
     # Gradient of velocity, r = R_s
-    def dv1(self, x, k_rho, n_int):
+    def dv1(self, x, k_rho):
         w = self.eta()
         y = (-(7 * x + 3) + (x + 1) * k_rho + 3 * (x + 1) / w) / (x + 1)
         return y
 
     # Gradient of velocity, r = R_c
-    def dv2(self, x, k_rho, n_int):
+    def dv2(self, x, k_rho):
         w = self.eta()
         y = (-2 * (x + 1) + k_rho + 2 / w) / (2 * x / (x + 1))
         return y
@@ -103,19 +106,26 @@ class Bubble(object):
         sh1['D' + str(count)].value = lamb
         sh1['E' + str(count)].value = vel
         sh1['F' + str(count)].value = self.v2(self.gamma, lamb)
-        l2 = self.lambda2(self.gamma, self.k_rho, self.n_int)
+        l2 = self.lambda2(self.gamma, self.k_rho)
         sh1['G' + str(count)].value = l2
         sh1['H' + str(count)].value = self.delta(lamb, l2)
-        sh1['I' + str(count)].value = self.dv1(self.gamma, self.k_rho, self.n_int)
-        sh1['J' + str(count)].value = self.dv2(self.gamma, self.k_rho, self.n_int)
-        sh1['K' + str(count)].value = self.r_sw(v_int, n0, k0)
+        dist = self.d()
+        sh1['I' + str(count)].value = dist
+        if dist > 0.001 and not (self.gamma == 5/3 and self.k_rho == 1 and self.n_int == 1):
+            sh1['J' + str(count)].value = 'No'
+        if self.gamma == 5/3 and self.k_rho == 1 and self.n_int == 1:
+            sh1['J' + str(count)].value = 'Intersects and goes further'
+        sh1['K' + str(count)].value = self.dv1(self.gamma, self.k_rho)
+        sh1['L' + str(count)].value = self.dv2(self.gamma, self.k_rho)
+        sh1['M' + str(count)].value = self.r_sw(v_int, n0, k0)
         lamb, pres = self.p_lambda_c()
-        sh1['L' + str(count)].value = pres
+        sh1['N' + str(count)].value = pres
+
         '''
-        sh1['M' + str(count)].value = self.p_sw()
-        sh1['N' + str(count)].value = self.f_psa()
-        sh1['O' + str(count)].value = self.xi()
-        sh1['P' + str(count)].value = self.f_p()'''
+        sh1['O' + str(count)].value = self.p_sw()
+        sh1['P' + str(count)].value = self.f_psa()
+        sh1['Q' + str(count)].value = self.xi()
+        sh1['R' + str(count)].value = self.f_p()'''
 
     # Scaling for the velocity curves
     def norm1(self):
@@ -125,6 +135,17 @@ class Bubble(object):
         for t in range(len(vel)):
             vel[t] = 1 + (vel[t] - 1) / (self.gamma - 1)
         return lamb, vel
+
+    # Calculating the distance between the last point and the slope
+    def d(self):
+        g = self.gamma
+        x, y = self.v_lambda_c()
+        k = (x - 2/(g+1)*y) * (2*(g+1))/(4+(g+1)**2)
+        ox = x - k * (g+1)/2
+        oy = ox * (g+1)/2
+        r = np.sqrt((ox-x)**2 + (oy-y)**2)
+        return r
+
     '''
     # Pressure on the B2 side
     def p_sw(self):  # rho, v
