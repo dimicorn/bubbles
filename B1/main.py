@@ -123,14 +123,39 @@ def main():
             plt.show()'''
 
         # Code for the plots that don't have intersection
+        '''
         for i in range(len(G)):
             for j in range(len(K)):
                 for q in range(len(N_int)):
                     bubble = Bubble(G[i], K[j], N_int[q])
-                    if bubble.d() > 0.001 and not (G[i] == 5/3 and K[j] == 1 and N_int == 1):
+                    if bubble.d() > 0.001 and not (G[i] == 5/3 and K[j] == 1 and N_int[q] == 1):
                         lamb, pres = bubble.solution2()
                         plt.plot(lamb, pres, label=K_rho + str(K[j]) + ', ' + N + str(N_int[q]))
             plt.grid()
+            plt.xlabel('Lambda')
+            plt.ylabel('P')
+            plt.title('P(Lambda), ' + Gamma + str(G[i]))
+            plt.legend()
+            plt.show()'''
+
+        # Code for all the plots with intersection
+        for i in range(len(G)):
+            for j in range(len(K)):
+                count = 0
+                for q in range(len(N_int)):
+                    bubble = Bubble(G[i], K[j], N_int[q])
+                    if bubble.d() < 0.001 or (G[i] == 5 / 3 and K[j] == 1 and N_int[q] == 1):
+                        lamb, pres = bubble.solution2()
+                        if count == 0:
+                            plt.plot(lamb, pres, color=Colors[j], label=K_rho + str(K[j]), linestyle=Line_style[q])
+                            count += 1
+                        else:
+                            plt.plot(lamb, pres, color=Colors[j], linestyle=Line_style[q])
+            plt.grid()
+            plt.plot([], [], 'k-', label=N + str(N_int[0]))
+            plt.plot([], [], 'k--', label=N + str(N_int[1]))
+            plt.plot([], [], 'k-.', label=N + str(N_int[2]))
+            plt.plot([], [], 'k.', label=N + str(N_int[3]))
             plt.xlabel('Lambda')
             plt.ylabel('P')
             plt.title('P(Lambda), ' + Gamma + str(G[i]))
