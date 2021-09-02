@@ -25,6 +25,7 @@ def main():
         sh1['F1'].value = 'v2(lambda_c1)'
         sh1['G1'].value = 'lambda_c2'
         '''
+
         sh1['D1'].value = 'delta lambda %'
         sh1['E1'].value = 'distance'
 
@@ -37,6 +38,7 @@ def main():
 
         sh1['F1'].value = 'P(r) from B1'
         sh1['G1'].value = 'P_sw from B2'
+        sh1['H1'].value = 'Q_p'
 
         # These are broken
         '''
@@ -45,6 +47,7 @@ def main():
         sh1['P1'].value = 'f_Psa'
         sh1['Q1'].value = '4'+'$/pi /xi$'
         sh1['R1'].value = 'f_p'''
+
         for i in range(len(G)):
             for j in range(len(K)):
                 for q in range(len(N_int)):

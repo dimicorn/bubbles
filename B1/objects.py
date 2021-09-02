@@ -126,6 +126,7 @@ class Bubble(object):
             '''
             sh1['F' + str(count)].value = self.p_r()
             sh1['G' + str(count)].value = self.p_sw()
+            sh1['H' + str(count)].value = self.p_sw()/self.p_r()
 
         # This is broken
         '''
