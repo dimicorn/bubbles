@@ -99,29 +99,38 @@ class Bubble(object):
 
     # Adding all the necessary data to the excel table
     def values(self, sh1, count):
-        sh1['A' + str(count)].value = self.gamma
-        sh1['B' + str(count)].value = self.k_rho
-        sh1['C' + str(count)].value = self.n_int
-        lamb, vel = self.v_lambda_c()
-        sh1['D' + str(count)].value = lamb
-        sh1['E' + str(count)].value = vel
-        sh1['F' + str(count)].value = self.v2(self.gamma, lamb)
-        l2 = self.lambda2(self.gamma, self.k_rho)
-        sh1['G' + str(count)].value = l2
-        sh1['H' + str(count)].value = self.delta(lamb, l2)
         dist = self.d()
-        sh1['I' + str(count)].value = dist
-        if dist > 0.001 and not (self.gamma == 5/3 and self.k_rho == 1 and self.n_int == 1):
-            sh1['J' + str(count)].value = 'No'
-        if self.gamma == 5/3 and self.k_rho == 1 and self.n_int == 1:
-            sh1['J' + str(count)].value = 'Intersects and goes further'
-        sh1['K' + str(count)].value = self.dv1(self.gamma, self.k_rho)
-        sh1['L' + str(count)].value = self.dv2(self.gamma, self.k_rho)
-        sh1['M' + str(count)].value = self.r_sw(v_int, n0, k0)
+        if dist < 0.001:
+            sh1['A' + str(count)].value = self.gamma
+            sh1['B' + str(count)].value = self.k_rho
+            sh1['C' + str(count)].value = self.n_int
+
+            lamb, vel = self.v_lambda_c()
+
+            # This works
+            '''
+            sh1['D' + str(count)].value = lamb
+            sh1['E' + str(count)].value = vel
+            sh1['F' + str(count)].value = self.v2(self.gamma, lamb)
+            sh1['G' + str(count)].value = l2
+            '''
+            l2 = self.lambda2(self.gamma, self.k_rho)
+            sh1['D' + str(count)].value = self.delta(lamb, l2)
+            sh1['E' + str(count)].value = dist
+
+            # And this too
+            '''
+            sh1['J' + str(count)].value = self.dv1(self.gamma, self.k_rho)
+            sh1['K' + str(count)].value = self.dv2(self.gamma, self.k_rho)
+            sh1['L' + str(count)].value = self.r_sw(v_int, n0, k0)
+            '''
+            sh1['F' + str(count)].value = self.p_r()
+            sh1['G' + str(count)].value = self.p_sw()
+
+        # This is broken
+        '''
         lamb, pres = self.p_lambda_c()
         sh1['N' + str(count)].value = pres
-
-        '''
         sh1['O' + str(count)].value = self.p_sw()
         sh1['P' + str(count)].value = self.f_psa()
         sh1['Q' + str(count)].value = self.xi()
@@ -146,13 +155,20 @@ class Bubble(object):
         r = np.sqrt((ox-x)**2 + (oy-y)**2)
         return r
 
-    '''
-    # Pressure on the B2 side
-    def p_sw(self):  # rho, v
+    # Pressure on the B1 side
+    def p_r(self):
         g = self.gamma
-        f = (2/(g + 1)) * ((g + 1)**2/(4*g))**(g/(g-1))  # *rho*v**2
+        lamb, p = self.p_lambda_c()
+        f = 2/(g+1) * p
         return f
 
+    # Pressure on the B2 side
+    def p_sw(self):
+        g = self.gamma
+        f = (2/(g + 1)) * ((g + 1)**2/(4*g))**(g/(g-1))
+        return f
+
+    '''
     def f_psa(self):
         k = self.k_rho
         g = self.gamma
