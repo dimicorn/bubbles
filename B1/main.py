@@ -91,7 +91,7 @@ def main():
             for j in range(len(K)):
                 for q in range(len(N_int)):
                     bubble = Bubble(G[i], K[j], N_int[q])
-                    lamb, vel = bubble.solution3()
+                    lamb, vel = bubble.lambda_c, bubble.velocity
                     plt.plot(lamb, vel, label=N + str(N_int[q]))
                     X = np.linspace(x0, 0.7, 1000)
                     a = [(G[i] + 1) / 2 * X[e] for e in range(1000)]
@@ -112,6 +112,7 @@ def main():
                 plt.xlabel('Lambda')
                 plt.ylabel('V')
                 plt.title('V(Lambda), ' + Gamma + str(G[i]) + ', ' + K_rho + str(K[j]))
+                plt.savefig('V(Lambda), ' + Gamma + str(G[i]) + ', ' + K_rho + str(K[j]) + '.png', dpi=300)
                 plt.show()
 
     elif a == 'plot' and b == 'pres':
@@ -121,7 +122,7 @@ def main():
             for j in range(len(K)):
                 for q in range(len(N_int)):
                     bubble = Bubble(G[i], K[j], N_int[q])
-                    lamb, pres = bubble.solution2()
+                    lamb, pres = bubble.lambda_c, bubble.pressure
                     if q == 0:
                         plt.plot(lamb, pres, color=Colors[j], label=K_rho + str(K[j]), linestyle=Line_style[q])
                     else:
@@ -144,7 +145,7 @@ def main():
                 for q in range(len(N_int)):
                     bubble = Bubble(G[i], K[j], N_int[q])
                     if bubble.d() > 0.001 and not (G[i] == 5/3 and K[j] == 1 and N_int[q] == 1):
-                        lamb, pres = bubble.solution2()
+                        lamb, pres = bubble.lambda_c, bubble.pressure
                         plt.plot(lamb, pres, label=K_rho + str(K[j]) + ', ' + N + str(N_int[q]))
             plt.grid()
             plt.xlabel('Lambda')
@@ -160,7 +161,7 @@ def main():
                 for q in range(len(N_int)):
                     bubble = Bubble(G[i], K[j], N_int[q])
                     if bubble.d() < 0.001 or (G[i] == 5 / 3 and K[j] == 1 and N_int[q] == 1):
-                        lamb, pres = bubble.solution2()
+                        lamb, pres = bubble.lambda_c, bubble.pressure
                         if count == 0:
                             plt.plot(lamb, pres, color=Colors[j], label=K_rho + str(K[j]), linestyle=Line_style[q])
                             count += 1
@@ -175,6 +176,7 @@ def main():
             plt.ylabel('P')
             plt.title('P(Lambda), ' + Gamma + str(G[i]))
             plt.legend()
+            plt.savefig('P(Lambda), ' + Gamma + str(G[i]) + '.png', dpi=300)
             plt.show()
 
 

@@ -4,52 +4,30 @@ from constants import*
 
 
 class Bubble(object):
-    def __init__(self, x, y, z):
-        self.gamma = x
-        self.k_rho = y
-        self.n_int = z
+    def __init__(self, a, b, c):
+        self.gamma = a
+        self.k_rho = b
+        self.n_int = c
 
-    # Solving system of ODE's
-    def solver(self, x, r):
-        v, rho, p = r
-        g = self.gamma
-        k = self.k_rho
-        n1 = self.n_int
-        n = (2 + n1) / (5 - k)
-        fv = (4 * g * v / ((g + 1) * x) - k - (1 - 1 / n) * (
-                ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) * rho * v / p - 2)) * (
-                     ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) ** 2 * rho / p - 2 * g / (g + 1)) ** (-1)
-        fp = ((1 / n - 1) * v - (2 * v / (g + 1) - x) * fv) * ((g + 1) / ((g - 1) * rho))
-        f_rho = ((-k * (g - 1) - 2 * (1 - 1 / n)) * (2 * v / (g + 1) - x) ** (-1) - 1 / p * fp) * (-rho / g)
-        return fv, f_rho, fp
+        # Solving system of ODE's
+        def solver(x, r):
+            v, rho, p = r
+            g = self.gamma
+            k = self.k_rho
+            n1 = self.n_int
+            n = (2 + n1) / (5 - k)
+            fv = (4 * g * v / ((g + 1) * x) - k - (1 - 1 / n) * (
+                    ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) * rho * v / p - 2)) * (
+                         ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) ** 2 * rho / p - 2 * g / (g + 1)) ** (-1)
+            fp = ((1 / n - 1) * v - (2 * v / (g + 1) - x) * fv) * ((g + 1) / ((g - 1) * rho))
+            f_rho = ((-k * (g - 1) - 2 * (1 - 1 / n)) * (2 * v / (g + 1) - x) ** (-1) - 1 / p * fp) * (-rho / g)
+            return fv, f_rho, fp
 
-    # Solutions for the system
-    def solution(self):
-        sol = integrate.solve_ivp(self.solver, (x0, x_k), (v0, rho0, p0),
+        # Solutions for the system
+        sol = integrate.solve_ivp(solver, (x0, x_k), (v0, rho0, p0),
                                   t_eval=np.linspace(x0, x_k, 1000), method='Radau')
-        v, rho, p = sol.y
-        lambda_c = sol.t
-        return lambda_c, v, p
-
-    # Taking the last element for velocity
-    def v_lambda_c(self):
-        lambda_c, v, p = self.solution()
-        return lambda_c[-1], v[-1]
-
-    # Taking the last element for pressure
-    def p_lambda_c(self):
-        lambda_c, v, p = self.solution()
-        return lambda_c[-1], p[-1]
-
-    # Extracting the pressure curve
-    def solution2(self):
-        lambda_c, v, p = self.solution()
-        return lambda_c, p
-
-    # Extracting the velocity curve
-    def solution3(self):
-        lambda_c, v, p = self.solution()
-        return lambda_c, v
+        self.velocity, self.density, self.pressure = sol.y
+        self.lambda_c = sol.t
 
     # Function for eta
     def eta(self):
@@ -105,17 +83,15 @@ class Bubble(object):
             sh1['B' + str(count)].value = self.k_rho
             sh1['C' + str(count)].value = self.n_int
 
-            lamb, vel = self.v_lambda_c()
-
             # This works
             '''
-            sh1['D' + str(count)].value = lamb
-            sh1['E' + str(count)].value = vel
-            sh1['F' + str(count)].value = self.v2(self.gamma, lamb)
+            sh1['D' + str(count)].value = self.lambda_c[-1]
+            sh1['E' + str(count)].value = self.velocity[-1]
+            sh1['F' + str(count)].value = self.v2(self.gamma, self.lambda_c[-1])
             sh1['G' + str(count)].value = l2
             '''
             l2 = self.lambda2(self.gamma, self.k_rho)
-            sh1['D' + str(count)].value = self.delta(lamb, l2)
+            sh1['D' + str(count)].value = self.delta(self.lambda_c[-1], l2)
             sh1['E' + str(count)].value = dist
 
             # And this too
@@ -130,7 +106,7 @@ class Bubble(object):
 
         # This is broken
         '''
-        lamb, pres = self.p_lambda_c()
+        lamb, pres = self.lambda_c[-1], self.pressure[-1]
         sh1['N' + str(count)].value = pres
         sh1['O' + str(count)].value = self.p_sw()
         sh1['P' + str(count)].value = self.f_psa()
@@ -139,7 +115,7 @@ class Bubble(object):
 
     # Scaling for the velocity curves
     def norm1(self):
-        lamb, vel, pres = self.solution()
+        lamb, vel, pres = self.lambda_c, self.velocity, self.pressure
         for t in range(len(lamb)):
             lamb[t] = 1 - (1 - lamb[t]) / (self.gamma - 1)
         for t in range(len(vel)):
@@ -149,7 +125,7 @@ class Bubble(object):
     # Calculating the distance between the last point and the slope
     def d(self):
         g = self.gamma
-        x, y = self.v_lambda_c()
+        x, y = self.lambda_c[-1], self.velocity[-1]
         k = (x - 2/(g+1)*y) * (2*(g+1))/(4+(g+1)**2)
         ox = x - k * (g+1)/2
         oy = ox * (g+1)/2
@@ -159,8 +135,7 @@ class Bubble(object):
     # Pressure on the B1 side
     def p_r(self):
         g = self.gamma
-        lamb, p = self.p_lambda_c()
-        f = 2/(g+1) * p
+        f = 2/(g+1) * self.pressure[-1]
         return f
 
     # Pressure on the B2 side
@@ -183,7 +158,7 @@ class Bubble(object):
         k = self.k_rho
         n = self.eta()
         f_psa = self.f_psa()
-        lambda_c, v = self.v_lambda_c()
+        lambda_c, v = self.lambda_c[-1], self.velocity[-1]
         x = 9*(g - 1)*n_int/((3-k)*n**2*(3*(g-1)*n + n_int)*f_psa*lambda_c**3)
         return x
 
