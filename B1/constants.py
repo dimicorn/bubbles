@@ -1,21 +1,21 @@
 # All values of gamma
-G = [1.01, 1.05, 1.1, 1.4, 5/3]
+G = [1.001, 1.01, 5/3, 1.7, 1.9, 2, 4]  # 1.05, 1.1, 1.2, 1.3, 1.4
 
 # Same for k_rho
-K = [0, 1, 1.5, 2, 2.5, 3]
+K = [0, 0.5, 1, 1.5, 2, 2.5, 3]
 
 # And n_int too
-N_int = [0.5, 1, 1.5, 2.5]
+N_int = [0, 0.5, 2.5, 3]  # 1, 1.5, 2
 
 # Colors for plot option
-Colors = ['purple', 'blue', 'red', 'green', 'cyan', 'orange']
+Colors = ['purple', 'blue', 'red', 'green', 'cyan', 'orange', 'black', 'gray']
 
 # Line styles for different n_int
 Line_style = ['solid', 'dashed', 'dashdot', 'dotted']
 
 # Starting and ending values of lambda
 x0 = 1
-x_k = 0.8
+x_k = 0.7
 
 # Initial conditions
 v0 = 1

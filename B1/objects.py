@@ -28,6 +28,8 @@ class Bubble(object):
                                   t_eval=np.linspace(x0, x_k, 1000), method='Radau')
         self.velocity, self.density, self.pressure = sol.y
         self.lambda_c = sol.t
+        self.slope_x = np.linspace(x0, x_k, 1000)
+        self.slope_y = np.array([(self.gamma + 1) / 2 * self.slope_x[e] for e in range(1000)])
 
     # Function for eta
     def eta(self):
@@ -122,15 +124,41 @@ class Bubble(object):
             vel[t] = 1 + (vel[t] - 1) / (self.gamma - 1)
         return lamb, vel
 
+    # Scaling for the linear slope
+    def norm2(self):
+        g = self.gamma
+        a = self.slope_x
+        b = self.slope_y
+        for t in range(len(a)):
+            a[t] = 1 - (1 - a[t]) / (g - 1)
+        for t in range(len(b)):
+            b[t] = 1 + (b[t] - 1) / (g - 1)
+        return a, b
+
+    # Searching for intersection
+    def intersect(self):
+        x1, y1, x2, y2 = self.lambda_c, self.velocity, self.slope_x, self.slope_y
+        count = 0
+        for i in range(len(x1)):
+            for j in range(len(x2)):
+                if x1[i] == x2[j] and y1[i] == y2[j]:
+                    count += 1
+                    return True
+        if count == 0:
+            return False
+
     # Calculating the distance between the last point and the slope
     def d(self):
-        g = self.gamma
-        x, y = self.lambda_c[-1], self.velocity[-1]
-        k = (x - 2/(g+1)*y) * (2*(g+1))/(4+(g+1)**2)
-        ox = x - k * (g+1)/2
-        oy = ox * (g+1)/2
-        r = np.sqrt((ox-x)**2 + (oy-y)**2)
-        return r
+        if self.intersect():
+            return 0
+        else:
+            g = self.gamma
+            x, y = self.lambda_c[-1], self.velocity[-1]
+            k = (x - 2/(g+1)*y) * (2*(g+1))/(4+(g+1)**2)
+            ox = x - k * (g+1)/2
+            oy = ox * (g+1)/2
+            r = np.sqrt((ox-x)**2 + (oy-y)**2)
+            return r
 
     # Pressure on the B1 side
     def p_r(self):
@@ -168,15 +196,6 @@ class Bubble(object):
         f = (4-k)/(3-k) * (n_int/(1+n_int))
         return f
     '''
-
-
-# Scaling for the linear slope
-def norm2(k, a, b):
-    for t in range(len(a)):
-        a[t] = 1 - (1 - a[t]) / (k - 1)
-    for t in range(len(b)):
-        b[t] = 1 + (b[t] - 1) / (k - 1)
-    return a, b
 
 
 if __name__ == '__main__':
