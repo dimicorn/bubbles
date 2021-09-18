@@ -8,12 +8,12 @@ class Bubble(object):
         self.gamma = a
         self.k_rho = b
         self.n_int = c
+        g = self.gamma
+        k = self.k_rho
 
         # Solving system of ODE's
         def solver(x, r):
             v, rho, p = r
-            g = self.gamma
-            k = self.k_rho
             n1 = self.n_int
             n = (2 + n1) / (5 - k)
             fv = (4 * g * v / ((g + 1) * x) - k - (1 - 1 / n) * (
@@ -30,6 +30,51 @@ class Bubble(object):
         self.lambda_c = sol.t
         self.slope_x = np.linspace(x0, x_k, 1000)
         self.slope_y = np.array([(self.gamma + 1) / 2 * self.slope_x[e] for e in range(1000)])
+        self.dist = -1
+        self.intersect = False
+        x1, y1, x2, y2 = self.lambda_c, self.velocity, self.slope_x, self.slope_y
+        count = 0
+        for i in range(len(x1)):
+            for j in range(len(x2)):
+                if x1[i] == x2[j] and y1[i] == y2[j]:
+                    count += 1
+                    self.dist = 0
+        if count == 0:
+            lamb, vel = self.lambda_c[-1], self.velocity[-1]
+            s = (lamb - 2 / (g + 1) * vel) * (2 * (g + 1)) / (4 + (g + 1) ** 2)
+            ox = lamb - s * (g + 1) / 2
+            oy = ox * (g + 1) / 2
+            d = np.sqrt((ox - lamb) ** 2 + (oy - vel) ** 2)
+            self.dist = d
+        if self.dist < 0.001:
+            self.intersect = True
+
+        """
+        # Searching for intersection
+        def intersect():
+            x1, y1, x2, y2 = self.lambda_c, self.velocity, self.slope_x, self.slope_y
+            count = 0
+            for i in range(len(x1)):
+                for j in range(len(x2)):
+                    if x1[i] == x2[j] and y1[i] == y2[j]:
+                        count += 1
+                        return True
+            if count == 0:
+                return False
+
+        # Calculating the distance between the last point and the slope
+        def d():
+            if self.intersect():
+                return 0
+            else:
+                g = self.gamma
+                x, y = self.lambda_c[-1], self.velocity[-1]
+                k = (x - 2 / (g + 1) * y) * (2 * (g + 1)) / (4 + (g + 1) ** 2)
+                ox = x - k * (g + 1) / 2
+                oy = ox * (g + 1) / 2
+                r = np.sqrt((ox - x) ** 2 + (oy - y) ** 2)
+                return r
+        """
 
     # Function for eta
     def eta(self):
@@ -79,11 +124,15 @@ class Bubble(object):
 
     # Adding all the necessary data to the excel table
     def values(self, sh1, count):
-        dist = self.d()
-        if dist < 0.001:
+        d = self.dist
+        if self.intersect:
             sh1['A' + str(count)].value = self.gamma
             sh1['B' + str(count)].value = self.k_rho
             sh1['C' + str(count)].value = self.n_int
+            l2 = self.lambda2(self.gamma, self.k_rho)
+            sh1['D' + str(count)].value = self.delta(self.lambda_c[-1], l2)
+            sh1['E' + str(count)].value = d
+            sh1['F' + str(count)].value = self.q_p()
 
             # This works
             '''
@@ -91,29 +140,12 @@ class Bubble(object):
             sh1['E' + str(count)].value = self.velocity[-1]
             sh1['F' + str(count)].value = self.v2(self.gamma, self.lambda_c[-1])
             sh1['G' + str(count)].value = l2
-            '''
-            l2 = self.lambda2(self.gamma, self.k_rho)
-            sh1['D' + str(count)].value = self.delta(self.lambda_c[-1], l2)
-            sh1['E' + str(count)].value = dist
-
-            # And this too
-            '''
             sh1['J' + str(count)].value = self.dv1(self.gamma, self.k_rho)
             sh1['K' + str(count)].value = self.dv2(self.gamma, self.k_rho)
             sh1['L' + str(count)].value = self.r_sw(v_int, n0, k0)
-            '''
             sh1['F' + str(count)].value = self.p_r()
             sh1['G' + str(count)].value = self.p_sw()
-            sh1['H' + str(count)].value = self.p_sw()/self.p_r()
-
-        # This is broken
-        '''
-        lamb, pres = self.lambda_c[-1], self.pressure[-1]
-        sh1['N' + str(count)].value = pres
-        sh1['O' + str(count)].value = self.p_sw()
-        sh1['P' + str(count)].value = self.f_psa()
-        sh1['Q' + str(count)].value = self.xi()
-        sh1['R' + str(count)].value = self.f_p()'''
+            '''
 
     # Scaling for the velocity curves
     def norm1(self):
@@ -135,31 +167,14 @@ class Bubble(object):
             b[t] = 1 + (b[t] - 1) / (g - 1)
         return a, b
 
-    # Searching for intersection
-    def intersect(self):
-        x1, y1, x2, y2 = self.lambda_c, self.velocity, self.slope_x, self.slope_y
-        count = 0
-        for i in range(len(x1)):
-            for j in range(len(x2)):
-                if x1[i] == x2[j] and y1[i] == y2[j]:
-                    count += 1
-                    return True
-        if count == 0:
-            return False
+    # Values of Q_p
+    def q_p(self):
+        g = self.gamma
+        p_r = 2 / (g + 1) * self.pressure[-1]
+        p_sw = (2/(g + 1)) * ((g + 1)**2/(4*g))**(g/(g-1))
+        return p_sw/p_r
 
-    # Calculating the distance between the last point and the slope
-    def d(self):
-        if self.intersect():
-            return 0
-        else:
-            g = self.gamma
-            x, y = self.lambda_c[-1], self.velocity[-1]
-            k = (x - 2/(g+1)*y) * (2*(g+1))/(4+(g+1)**2)
-            ox = x - k * (g+1)/2
-            oy = ox * (g+1)/2
-            r = np.sqrt((ox-x)**2 + (oy-y)**2)
-            return r
-
+    """
     # Pressure on the B1 side
     def p_r(self):
         g = self.gamma
@@ -171,31 +186,7 @@ class Bubble(object):
         g = self.gamma
         f = (2/(g + 1)) * ((g + 1)**2/(4*g))**(g/(g-1))
         return f
-
-    '''
-    def f_psa(self):
-        k = self.k_rho
-        g = self.gamma
-        n = self.eta()
-        f = 2 * ((4 - k)*n - 1)/((g+1)*(3-k)*n)
-        return f
-
-    def xi(self):
-        g = self.gamma
-        n_int = self.n_int
-        k = self.k_rho
-        n = self.eta()
-        f_psa = self.f_psa()
-        lambda_c, v = self.lambda_c[-1], self.velocity[-1]
-        x = 9*(g - 1)*n_int/((3-k)*n**2*(3*(g-1)*n + n_int)*f_psa*lambda_c**3)
-        return x
-
-    def f_p(self):
-        k = self.k_rho
-        n_int = self.n_int
-        f = (4-k)/(3-k) * (n_int/(1+n_int))
-        return f
-    '''
+    """
 
 
 if __name__ == '__main__':
