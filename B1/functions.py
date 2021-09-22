@@ -1,6 +1,6 @@
 import openpyxl
 import matplotlib.pyplot as plt
-from objects import*
+from bubble import*
 
 
 def data():
@@ -157,6 +157,7 @@ def pres_plots(x):
             lab(i)
 
 
+# Creating a scatter plot with values of Q_p in 3D
 def scat():
     for i in range(len(G)):
         fig = plt.figure()
@@ -176,6 +177,27 @@ def scat():
         ax.set_zlabel('Q_p')
         fig.savefig('Q_p, ' + Gamma + str(G[i]) + '.png', dpi=300)
         fig.show()
+
+
+# Creating colormaps
+def colormap():
+    for i in range(len(G)):
+        for j in range(len(K)):
+            for q in range(len(N_int)):
+                bubble = Bubble(G[i], K[j], N_int[q])
+                if bubble.intersect:
+                    q_p = bubble.q_p()
+                    if 0.9 < q_p < 1.15:
+                        plt.scatter(K[j], N_int[q], c='blue', alpha=0.5)
+                    else:
+                        plt.scatter(K[j], N_int[q], c='red', alpha=0.5)
+                else:
+                    plt.scatter(K[j], N_int[q], c='gray', alpha=0.5)
+        plt.title('Colormap, ' + Gamma + str(G[i]))
+        plt.xlabel('K_rho')
+        plt.ylabel('N_int')
+        plt.savefig('Colormap, ' + Gamma + str(G[i]) + '.png', dpi=300)
+        plt.show()
 
 
 if __name__ == '__main__':
