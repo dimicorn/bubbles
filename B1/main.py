@@ -2,6 +2,10 @@ import openpyxl
 from functions import *
 
 
+K_ext = np.linspace(0, 3, num=10)
+N_ext = np.linspace(0, 3, num=10)
+
+
 def main():
     a = str(input('Data or plot? '))
     c = ''
@@ -28,11 +32,13 @@ def main():
         if d == '3d':
             fig = plt.figure()
             ax = plt.axes(projection='3d')
-        for j in range(len(K)):
+        for j in range(len(K_ext)):
+            '''
             if c == 'pres':
                 count = 0
-            for q in range(len(N_int)):
-                bubble = Bubble(G[i], K[j], N_int[q])
+            '''
+            for q in range(len(N_ext)):
+                bubble = Bubble(G[i], K_ext[j], N_ext[q])
                 if a == 'data' and bubble.intersect:
                     bubble.values(sh1, count)
                     count += 1
@@ -45,17 +51,22 @@ def main():
                 elif d == '2d':
                     if bubble.intersect:
                         q_p = bubble.q_p()
-                        if 0.9 < q_p < 1.15:
-                            plt.scatter(K[j], N_int[q], c='blue', alpha=0.5)
+                        if 0.9 < q_p < 0.95:
+                            plt.scatter(K_ext[j], N_ext[q], c='cyan')
+                        elif 0.95 < q_p < 1.05:
+                            plt.scatter(K_ext[j], N_ext[q], c='blue')
+                        elif 1.05 < q_p < 1.15:
+                            plt.scatter(K_ext[j], N_ext[q], c='darkcyan')
                         else:
-                            plt.scatter(K[j], N_int[q], c='red', alpha=0.5)
+                            plt.scatter(K_ext[j], N_ext[q], c='red')
                     else:
-                        plt.scatter(K[j], N_int[q], c='gray', alpha=0.5)
+                        plt.scatter(K_ext[j], N_ext[q], c='gray')
                 elif c == 'vel':
                     lamb, vel = bubble.lambda_c, bubble.velocity
                     plt.plot(lamb, vel, label=N + str(N_int[q]))
                     if q == 0:
                         plt.plot(bubble.slope_x, bubble.slope_y, label=Gamma + str(G[i]))
+                '''
                 elif c == 'pres' and bubble.intersect:
                     lamb, pres = bubble.lambda_c, bubble.pressure
                     if count == 0:
@@ -63,6 +74,7 @@ def main():
                         count += 1
                     else:
                         plt.plot(lamb, pres, color=Colors[j], linestyle=Line_style[q])
+                '''
             if c == 'vel':
                 if i == 0:
                     plt.axis([0.99, 1., 0.99, 1.02])
@@ -90,14 +102,20 @@ def main():
             fig.savefig('Q_p, ' + Gamma + str(G[i]) + '.png', dpi=300)
             fig.show()
         elif d == '2d':
+            plt.plot([], [], c='cyan', marker='o', label='0.9 < Q_p < 0.95')
+            plt.plot([], [], c='blue', marker='o', label='0.95 < Q_p < 1.05')
+            plt.plot([], [], c='darkcyan', marker='o', label='1.05 < Q_p < 1.15')
             plt.title('Colormap, ' + Gamma + str(G[i]))
             plt.xlabel('K_rho')
             plt.ylabel('N_int')
+            plt.legend()
             plt.savefig('Colormap, ' + Gamma + str(G[i]) + '.png', dpi=300)
             plt.show()
+        '''
         elif c == 'pres':
             leg()
             lab(i)
+        '''
     if a == 'data':
         wb.save(file_path)
 

@@ -5,7 +5,7 @@ G = [1.001, 1.01, 1.4, 1.5, 1.6, 5/3, 1.7, 1.9, 2, 4]  # 1.05, 1.1, 1.2, 1.3, 1.
 K = [0, 0.5, 1, 1.5, 2, 2.5, 3]
 
 # And n_int too
-N_int = [0, 0.5, 2.5, 3]  # 1, 1.5, 2
+N_int = [0, 0.5, 1, 1.5, 2, 2.5, 3]
 
 # Colors for plot option
 Colors = ['purple', 'blue', 'red', 'green', 'cyan', 'orange', 'black', 'gray']
