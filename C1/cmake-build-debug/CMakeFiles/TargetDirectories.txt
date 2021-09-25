@@ -1,0 +1,3 @@
+C:/Users/dmitr/Desktop/MIPT/Лето 21/Dr. Shang/Bubbles/Git repository/C1/cmake-build-debug/CMakeFiles/C1.dir
+C:/Users/dmitr/Desktop/MIPT/Лето 21/Dr. Shang/Bubbles/Git repository/C1/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/dmitr/Desktop/MIPT/Лето 21/Dr. Shang/Bubbles/Git repository/C1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
