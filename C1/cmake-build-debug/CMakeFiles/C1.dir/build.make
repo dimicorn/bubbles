@@ -66,7 +66,6 @@ include CMakeFiles/C1.dir/progress.make
 include CMakeFiles/C1.dir/flags.make
 
 CMakeFiles/C1.dir/main.cpp.obj: CMakeFiles/C1.dir/flags.make
-CMakeFiles/C1.dir/main.cpp.obj: CMakeFiles/C1.dir/includes_CXX.rsp
 CMakeFiles/C1.dir/main.cpp.obj: ../main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="C:\Users\dmitr\Desktop\MIPT\Лето 21\Dr. Shang\Bubbles\Git repository\C1\cmake-build-debug\CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/C1.dir/main.cpp.obj"
 	C:\MinGW\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\C1.dir\main.cpp.obj -c "C:\Users\dmitr\Desktop\MIPT\Лето 21\Dr. Shang\Bubbles\Git repository\C1\main.cpp"
