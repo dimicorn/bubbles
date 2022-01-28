@@ -1,6 +1,7 @@
 #include "class.h"
 #include "constants.h"
 #include <string>
+#include <cmath>
 #include <fstream>
 #include <utility>
 #include <boost/numeric/odeint.hpp>
@@ -10,12 +11,29 @@
 typedef boost::numeric::ublas::vector<double> vector_type;
 typedef boost::numeric::ublas::matrix<double> matrix_type;
 
-Bubble::Bubble(double gamma, double k_rho, double n_int):
-    gamma__(gamma), k_rho__(k_rho), n_int__(n_int) {
+Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
+    gamma__(gamma), k_rho__(k_rho), n_int__(n_int), i_(i), j_(j), k_(k) {
         static double gamma_ = gamma__;
         static double k_rho_ = k_rho__;
         static double n_int_ = n_int__;
         static double eta_ = eta__;
+        // Not very pretty, but works fine
+        if (gamma_ != gamma__) {
+            double temp = gamma__ - gamma_;
+            gamma_ += temp;
+        }
+        if (k_rho_ != k_rho__) {
+            double temp = k_rho__ - k_rho_;
+            k_rho_ += temp;
+        }
+        if (n_int_ != n_int__) {
+            double temp = n_int__ - n_int_;
+            n_int_ += temp;
+        }
+        if (eta_ != eta__) {
+            double temp = eta__ - eta_;
+            eta_ += temp;
+        }
         struct stiff_system {
             void operator()(const vector_type &x, vector_type &dxdt, double t) {
                 // Derivative of velocity
@@ -53,14 +71,23 @@ Bubble::Bubble(double gamma, double k_rho, double n_int):
                 dfdt[2] = 1 / gamma_ * (drhodl * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + dpdl / x[1]) + x[2] * ((-k_rho_ * (gamma_ - 1) - 2 * (1 - 1 / eta_)) * (2 / (gamma_ + 1) * dvdl - 1) / ((2 * x[0] / (gamma_ + 1) - t) * (2 * x[0] / (gamma_ + 1) - t)) + (-dpdl / (x[1] * x[1]) * dpdl + dfdt[1] / x[1])));
             }
         };
+
+        std::ofstream output;
+        // std::cout << gamma_ << " " << k_rho_ << " " << n_int_ << std::endl;
+        float Gamma = std::round(gamma__ * 100.0) / 100.0;
+        float K_rho = std::round(k_rho__ * 100.0) / 100.0;
+        float N_int = std::round(n_int__ * 100.0) / 100.0;
+        output.open("data/gamma_" + std::to_string(Gamma) + "_k_rho_" + std::to_string(K_rho) + "_n_int_" + std::to_string(N_int) + ".txt");
+
         vector_type x(3, 1.0); // Size and initial conditions (expecting equal values)
-        size_t num_of_steps = integrate_const(boost::numeric::odeint::make_dense_output<boost::numeric::odeint::rosenbrock4<double>>(1.0e-8, 1.0e-8),
+        size_t num_of_steps = integrate_const(boost::numeric::odeint::make_dense_output<boost::numeric::odeint::rosenbrock4<double>>(1.0e-6, 1.0e-6),
                 std::make_pair(stiff_system(), stiff_system_jacobi()),
                 x, 1.0, 0.9, -0.001,
-                std::cout << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << "\n");
-        // std::clog << num_of_steps << std::endl;
-    };
+                output << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << std::endl);
 
+        // std::clog << num_of_steps << std::endl;
+        output.close();
+    };
 // Value of the curve at lambda_c
 double Bubble::CurveValue(double lambda_c) {
     return (gamma__ + 1) / 2 * lambda_c;
@@ -115,6 +142,11 @@ int Bubble::Q_p() {
      return 0;
 }
 
-std::string Bubble::Output() {
-    return "Test";
+/*
+void Bubble::Output() {
+    std::ofstream output_file;
+    // output_file.open("output.txt");
+    std::cout << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << std::endl;
+    // output_file.close();
 }
+*/

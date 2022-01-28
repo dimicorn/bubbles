@@ -1,5 +1,6 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
+
 // Starting and ending values of lambda
 const float x0 = 1;
 const float x_k = 0.7;
