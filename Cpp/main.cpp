@@ -7,10 +7,10 @@ int main(int argc, char **argv) {
     std::ofstream output_file;
     std::vector<float> Gamma, K_rho, N_int;
     for (int i = 0; i < 20; ++i) {
-        Gamma.push_back(1 + i * 0.05);
+        Gamma.push_back(1 + (i + 1) * 0.05);
         K_rho.push_back(0.15 * i);
         N_int.push_back(0.15 * i);
-        std::cout << Gamma[i] << ' ' << K_rho[i] << ' ' << N_int[i];
+        std::cout << Gamma[i] << ' ' << K_rho[i] << ' ' << N_int[i] << std::endl;
     }
     output_file.open("output.txt");
     for (int i = 0; i < Gamma.size(); ++i) {

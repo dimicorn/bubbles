@@ -30,6 +30,7 @@ Bubble::Bubble(double gamma, double k_rho, double n_int):
             void operator()(const vector_type &x, matrix_type &J, const double &t, vector_type &dfdt) {
                 double alpha = ((4 * x[0] * gamma_ / (t * (gamma_ + 1)) - k_rho_ - (1 - 1 / eta_) * (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * x[0] - 2)));
                 double beta = (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * (2 * x[0] / (gamma_ + 1) - t) - 2 * gamma_ / (gamma_ + 1));
+
                 // Derivatives of velocity, pressure and density
                 double dvdl = alpha / beta;
                 double dpdl = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dvdl) * (gamma_ + 1) / (gamma_ - 1) * x[2];
@@ -55,7 +56,7 @@ Bubble::Bubble(double gamma, double k_rho, double n_int):
         vector_type x(3, 1.0); // Size and initial conditions (expecting equal values)
         size_t num_of_steps = integrate_const(boost::numeric::odeint::make_dense_output<boost::numeric::odeint::rosenbrock4<double>>(1.0e-8, 1.0e-8),
                 std::make_pair(stiff_system(), stiff_system_jacobi()),
-                x, 1.0, 0.7, -0.001,
+                x, 1.0, 0.9, -0.001,
                 std::cout << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << "\n");
         // std::clog << num_of_steps << std::endl;
     };
