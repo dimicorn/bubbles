@@ -2,6 +2,7 @@
 #include "constants.h"
 #include <string>
 #include <cmath>
+#include <vector>
 #include <fstream>
 #include <utility>
 #include <boost/numeric/odeint.hpp>
@@ -10,6 +11,22 @@
 
 typedef boost::numeric::ublas::vector<double> vector_type;
 typedef boost::numeric::ublas::matrix<double> matrix_type;
+
+// Observer function
+struct StreamingObserver {
+    std::ostream& m_out;
+    StreamingObserver(std::ostream &out) : m_out(out) {}
+
+    template<class State>
+    void operator()(const State &x, double t) const {
+        vector_type q = x;
+        m_out << t;
+        for (size_t i = 0; i < q.size(); ++i) {
+            m_out << " " << q[i];
+        }
+        m_out << std::endl;
+    }
+};
 
 Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
     gamma__(gamma), k_rho__(k_rho), n_int__(n_int), i_(i), j_(j), k_(k) {
@@ -34,17 +51,18 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
             double temp = eta__ - eta_;
             eta_ += temp;
         }
-        struct stiff_system {
+
+        struct StiffSystem {
             void operator()(const vector_type &x, vector_type &dxdt, double t) {
                 // Derivative of velocity
                 dxdt[0] = ((4 * x[0] * gamma_ / (t * (gamma_ + 1)) - k_rho_ - (1 - 1 / eta_) * (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * x[0] - 2))) / (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * (2 * x[0] / (gamma_ + 1) - t) - 2 * gamma_ / (gamma_ + 1));
                 // Derivative of pressure
-                dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / (gamma_ - 1) * x[2];
+                dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / (gamma_ - 1) * x[2]; // different 
                 // Derivative of density
                 dxdt[2] = x[2] / gamma_ * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + 1 / x[1] * dxdt[2]);
             }
         };
-        struct stiff_system_jacobi {
+        struct StiffSystemJacobi {
             void operator()(const vector_type &x, matrix_type &J, const double &t, vector_type &dfdt) {
                 double alpha = ((4 * x[0] * gamma_ / (t * (gamma_ + 1)) - k_rho_ - (1 - 1 / eta_) * (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * x[0] - 2)));
                 double beta = (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * (2 * x[0] / (gamma_ + 1) - t) - 2 * gamma_ / (gamma_ + 1));
@@ -80,12 +98,12 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
         output.open("data/gamma_" + std::to_string(Gamma) + "_k_rho_" + std::to_string(K_rho) + "_n_int_" + std::to_string(N_int) + ".txt");
 
         vector_type x(3, 1.0); // Size and initial conditions (expecting equal values)
-        size_t num_of_steps = integrate_const(boost::numeric::odeint::make_dense_output<boost::numeric::odeint::rosenbrock4<double>>(1.0e-6, 1.0e-6),
-                std::make_pair(stiff_system(), stiff_system_jacobi()),
-                x, 1.0, 0.9, -0.001,
-                output << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << std::endl);
-
+        size_t num_of_steps = integrate_const(boost::numeric::odeint::make_dense_output<boost::numeric::odeint::rosenbrock4<double>>(1.0e-8, 1.0e-8),
+                std::make_pair(StiffSystem(), StiffSystemJacobi()),
+                x, 1.0, 0.9, -0.001, StreamingObserver(std::cout));
+        // output << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << std::endl);
         // std::clog << num_of_steps << std::endl;
+        std::cout << LambdaApprox() << std::endl;
         output.close();
     };
 // Value of the curve at lambda_c
@@ -96,7 +114,7 @@ double Bubble::CurveValue(double lambda_c) {
 // Approximation using eqn B8a
 double Bubble::LambdaApprox() {
     double t = gamma__ * gamma__ * gamma__ + 12 * gamma__ * gamma__ + 8 * gamma__ + 1 - 0.5 * (gamma__ + 1) * (3 * gamma__ + 1) * k_rho__ - (gamma__ + 1) * (4 * gamma__ + 1) / eta__;
-    double u = 3 * gamma__ * gamma__ * gamma__ + 12 * gamma__ * gamma__ + 7 * gamma__ + 1 - 0.5 * (gamma__ + 1) * (3 * gamma__ + 1) * k_rho__ - (gamma__ + 1) * (4 * gamma__ + 1) / eta__;
+    double u = 2 * gamma__ * gamma__ * gamma__ + 12 * gamma__ * gamma__ + 7 * gamma__ + 1 - 0.5 * (gamma__ + 1) * (3 * gamma__ + 1) * k_rho__ - (gamma__ + 1) * (4 * gamma__ + 1) / eta__;
     return t / u; 
 }
 
@@ -142,11 +160,6 @@ int Bubble::Q_p() {
      return 0;
 }
 
-/*
-void Bubble::Output() {
-    std::ofstream output_file;
-    // output_file.open("output.txt");
-    std::cout << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << std::endl;
-    // output_file.close();
+void Bubble::Observer() {
+    std::cout << "hi" << std::endl;
 }
-*/

@@ -27,7 +27,8 @@ def main():
         sh1['C1'].value = 'n_int'
         sh1['D1'].value = 'distance'
         sh1['E1'].value = 'Q_p'
-
+        sh1['G1'].value = 'lambda_c'
+        sh1['H1'].value = 'vel(lambda_c)'
     for i in range(len(G)):
         if d == '3d':
             fig = plt.figure()

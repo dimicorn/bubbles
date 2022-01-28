@@ -13,9 +13,9 @@ That is the directory, where the output of the program will be stored.
 
 
 To run the program (single thread):
-g++ main.cpp class.cpp -o out
-./out 
+$ g++ main.cpp class.cpp -o out
+$ ./out 
 
 Running with multiple threads (using OpenMP):
-g++ main.cpp class.cpp -o out -fopenmp
-./out
+$ g++ main.cpp class.cpp -o out -fopenmp
+$ ./out

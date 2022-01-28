@@ -28,7 +28,7 @@ K_rho = 'k_rho = '
 N = 'n_int = '
 
 # The place where will be created an excel table with all the data
-file_path = "C:/Users/dmitr/Desktop/MIPT/Лето 21/Dr. Shang/Bubbles/Data/Auto2.xlsx"
+file_path = "data/Auto1.xlsx"
 
 au = 150 * 10**9
 

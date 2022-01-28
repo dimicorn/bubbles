@@ -21,8 +21,6 @@ class Bubble {
         int Norm2();
         int Values();
         int Q_p();
-        /*
-        void Output();
-        */
+        static void Observer();
 };
 #endif

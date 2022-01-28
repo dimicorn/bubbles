@@ -19,7 +19,7 @@ class Bubble(object):
             fv = (4 * g * v / ((g + 1) * x) - k - (1 - 1 / n) * (
                     ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) * rho * v / p - 2)) * (
                          ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) ** 2 * rho / p - 2 * g / (g + 1)) ** (-1)
-            fp = ((1 / n - 1) * v - (2 * v / (g + 1) - x) * fv) * ((g + 1) / ((g - 1) * rho))
+            fp = ((1 / n - 1) * v - (2 * v / (g + 1) - x) * fv) * ((g + 1) / ((g - 1) * rho)) # error
             f_rho = ((-k * (g - 1) - 2 * (1 - 1 / n)) * (2 * v / (g + 1) - x) ** (-1) - 1 / p * fp) * (-rho / g)
             return fv, f_rho, fp
 
@@ -135,17 +135,15 @@ class Bubble(object):
             sh1['F' + str(count)].value = self.q_p()
 
             # This works
-            '''
-            sh1['D' + str(count)].value = self.lambda_c[-1]
-            sh1['E' + str(count)].value = self.velocity[-1]
-            sh1['F' + str(count)].value = self.v2(self.gamma, self.lambda_c[-1])
-            sh1['G' + str(count)].value = l2
-            sh1['J' + str(count)].value = self.dv1(self.gamma, self.k_rho)
-            sh1['K' + str(count)].value = self.dv2(self.gamma, self.k_rho)
-            sh1['L' + str(count)].value = self.r_sw(v_int, n0, k0)
-            sh1['F' + str(count)].value = self.p_r()
-            sh1['G' + str(count)].value = self.p_sw()
-            '''
+            sh1['G' + str(count)].value = self.lambda_c[-1]
+            sh1['H' + str(count)].value = self.velocity[-1]
+            sh1['I' + str(count)].value = self.v2(self.gamma, self.lambda_c[-1])
+            sh1['J' + str(count)].value = l2
+            sh1['K' + str(count)].value = self.dv1(self.gamma, self.k_rho)
+            sh1['L' + str(count)].value = self.dv2(self.gamma, self.k_rho)
+            sh1['M' + str(count)].value = self.r_sw(v_int, n0, k0)
+            # sh1['N' + str(count)].value = self.p_r()
+            # sh1['O' + str(count)].value = self.p_sw()
 
     # Scaling for the velocity curves
     def norm1(self):

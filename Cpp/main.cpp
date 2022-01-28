@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
         K_rho.push_back(0.15 * i);
         N_int.push_back(0.15 * i);
     }
+    /*
     // Parallel nested for loop
     #pragma omp parallel for collapse(3)
     for (int i = 0; i < Gamma.size(); ++i) {
@@ -21,5 +22,7 @@ int main(int argc, char **argv) {
             }
         }
     }
+    */
+    Bubble bubble(5.0 / 3.0, 0, 3, 0, 0, 0);
     return 0;
 }
