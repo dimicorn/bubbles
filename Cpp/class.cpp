@@ -11,7 +11,11 @@ typedef boost::numeric::ublas::vector<double> vector_type;
 typedef boost::numeric::ublas::matrix<double> matrix_type;
 
 Bubble::Bubble(double gamma, double k_rho, double n_int):
-    gamma_(gamma), k_rho_(k_rho), n_int_(n_int) {
+    gamma__(gamma), k_rho__(k_rho), n_int__(n_int) {
+        static double gamma_ = gamma__;
+        static double k_rho_ = k_rho__;
+        static double n_int_ = n_int__;
+        static double eta_ = eta__;
         struct stiff_system {
             void operator()(const vector_type &x, vector_type &dxdt, double t) {
                 // Derivative of velocity
@@ -24,44 +28,59 @@ Bubble::Bubble(double gamma, double k_rho, double n_int):
         };
         struct stiff_system_jacobi {
             void operator()(const vector_type &x, matrix_type &J, const double &t, vector_type &dfdt) {
-                // Jacobian of the system should be changed
-                J(0, 0) = -101.0;
-                J(0, 1) = -100.0;
-                J(1, 0) = 1.0;
-                J(1, 1) = 0.0;
-                dfdt[0] = 0.0;
-                dfdt[1] = 0.0;
+                double alpha = ((4 * x[0] * gamma_ / (t * (gamma_ + 1)) - k_rho_ - (1 - 1 / eta_) * (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * x[0] - 2)));
+                double beta = (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * (2 * x[0] / (gamma_ + 1) - t) - 2 * gamma_ / (gamma_ + 1));
+                // Derivatives of velocity, pressure and density
+                double dvdl = alpha / beta;
+                double dpdl = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dvdl) * (gamma_ + 1) / (gamma_ - 1) * x[2];
+                double drhodl = x[2] / gamma_ * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + 1 / x[1] * dpdl);
+
+                // Jacobian
+                J(0, 0) = ((4 * gamma_/ (t * (gamma_ + 1)) - (1 - 1 / eta_) * x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (4 * x[0] / (gamma_ + 1) - t)) * beta - alpha * (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * 4 / (gamma_ + 1))) / (beta * beta);
+                J(0, 1) = ((1 - 1 / eta_) * (-x[2] / (x[1] * x[1]) * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * x[0]) * beta - alpha * ((4 * x[0] * gamma_ / (t * (gamma_ + 1)) - k_rho_ - (1 - 1 / eta_) * (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * x[0] - 2)))) / (beta * beta);
+                J(0, 2) = ((1 - 1 / eta_) * 1 / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * x[0] * beta - alpha * ((4 * x[0] * gamma_ / (t * (gamma_ + 1)) - k_rho_ - (1 - 1 / eta_) * (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * x[0] - 2)))) / (beta * beta);
+                J(1, 0) = (gamma_ + 1) / (gamma_ - 1) * x[2] * (-1 + 1 / eta_ - (2 / (gamma_ + 1) * dvdl + (2 * x[0] / (gamma_ + 1) - t) * J(0, 0)));
+                J(1, 1) = (gamma_ + 1) / (gamma_ - 1) * -x[2] * (2 * x[0] / (gamma_ + 1) - t) * J(0, 1);
+                J(1, 2) = (gamma_ + 1) / (gamma_ - 1) * (-x[0] * (1 - 1 / eta_) - (2 * x[0] / (gamma_ + 1) - t) * dvdl) + (gamma_ + 1) / (gamma_ - 1) * -x[2] * (2 * x[0] / (gamma_ + 1) - t) * J(0, 2);
+                J(2, 0) = x[2] / gamma_ * (k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_) * (-2) / ((gamma_ + 1) * (2 * x[0] / (gamma_ + 1) - t) * (2 * x[0] / (gamma_ + 1) - t)) + 1 / x[1] * J(1, 0));
+                J(2, 1) = x[2] / gamma_ * (-1 / (x[1] * x[1]) * dpdl + 1 / x[1] * J(1, 1));
+                J(2, 2) = 1 / gamma_ * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + 1 / x[1] * dpdl) + x[2] / gamma_ * 1 / x[1] * J(1, 2);
+
+                // Derivatives by lambda
+                dfdt[0] = ((4 * gamma_ / (gamma_ + 1) * (dvdl / t - x[0] / (t * t)) - (1 - 1 / eta_) * ((gamma_ + 1) / (gamma_ - 1) * (((dpdl * x[0] + dvdl * x[1]) * x[2] - x[0] * x[1] * drhodl) / (x[2] * x[2]) * (2 * x[0] / (gamma_ + 1) - t) + x[0] * x[1] / x[2] * (2 / (gamma_ + 1) * dvdl - 1)))) * beta - alpha * ((gamma_ + 1) / (gamma_ - 1) * ((drhodl * x[1] + dpdl * x[2]) * ((2 * x[0] / (gamma_ + 1) - t) * (2 * x[0] / (gamma_ + 1) - t)) + 2 * x[2] / x[1] * (2 * x[0] / (gamma_ + 1) - t) * (2 / (gamma_ + 1) * dvdl - 1)))) / (beta * beta);
+                dfdt[1] = (gamma_ + 1) / (gamma_ - 1) * ((-(1 - 1 / eta_) * dvdl - ((2 / (gamma_ + 1) * dvdl - 1) * dvdl + (2 * x[0] / (gamma_ + 1) - t) * dfdt[0]))+ (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dvdl) * drhodl);
+                dfdt[2] = 1 / gamma_ * (drhodl * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + dpdl / x[1]) + x[2] * ((-k_rho_ * (gamma_ - 1) - 2 * (1 - 1 / eta_)) * (2 / (gamma_ + 1) * dvdl - 1) / ((2 * x[0] / (gamma_ + 1) - t) * (2 * x[0] / (gamma_ + 1) - t)) + (-dpdl / (x[1] * x[1]) * dpdl + dfdt[1] / x[1])));
             }
         };
-        vector_type x(2, 1.0); // Not sure what this is, probably should be changed as well
-        size_t num_of_steps = integrate_const(boost::numeric::odeint::make_dense_output<boost::numeric::odeint::rosenbrock4<double>>(1.0e-6, 1.0e-6),
+        vector_type x(3, 1.0); // Size and initial conditions (expecting equal values)
+        size_t num_of_steps = integrate_const(boost::numeric::odeint::make_dense_output<boost::numeric::odeint::rosenbrock4<double>>(1.0e-8, 1.0e-8),
                 std::make_pair(stiff_system(), stiff_system_jacobi()),
-                x, 0.0, 50.0, 0.01,
+                x, 1.0, 0.7, -0.001,
                 std::cout << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << "\n");
         // std::clog << num_of_steps << std::endl;
     };
 
 // Value of the curve at lambda_c
 double Bubble::CurveValue(double lambda_c) {
-    return (gamma_ + 1) / 2 * lambda_c;
+    return (gamma__ + 1) / 2 * lambda_c;
 }
 
 // Approximation using eqn B8a
 double Bubble::LambdaApprox() {
-    double t = gamma_ * gamma_ * gamma_ + 12 * gamma_ * gamma_ + 8 * gamma_ + 1 - 0.5 * (gamma_ + 1) * (3 * gamma_ + 1) * k_rho_ - (gamma_ + 1) * (4 * gamma_ + 1) / eta_;
-    double u = 3 * gamma_ * gamma_ * gamma_ + 12 * gamma_ * gamma_ + 7 * gamma_ + 1 - 0.5 * (gamma_ + 1) * (3 * gamma_ + 1) * k_rho_ - (gamma_ + 1) * (4 * gamma_ + 1) / eta_;
+    double t = gamma__ * gamma__ * gamma__ + 12 * gamma__ * gamma__ + 8 * gamma__ + 1 - 0.5 * (gamma__ + 1) * (3 * gamma__ + 1) * k_rho__ - (gamma__ + 1) * (4 * gamma__ + 1) / eta__;
+    double u = 3 * gamma__ * gamma__ * gamma__ + 12 * gamma__ * gamma__ + 7 * gamma__ + 1 - 0.5 * (gamma__ + 1) * (3 * gamma__ + 1) * k_rho__ - (gamma__ + 1) * (4 * gamma__ + 1) / eta__;
     return t / u; 
 }
 
 // Gradient of velocity, r = R_s
 double Bubble::GradVel1() {
-    double temp = (-(7 * gamma_ + 3) + (gamma_ + 1) * k_rho_ + 3 * (gamma_ + 1) / eta_) / (gamma_ + 1);
+    double temp = (-(7 * gamma__ + 3) + (gamma__ + 1) * k_rho__ + 3 * (gamma__ + 1) / eta__) / (gamma__ + 1);
     return temp;
 }
 
 // Gradient of velocity, r = R_s
 double Bubble::GradVel2() {
-    double temp = (-2 * (gamma_ + 1) + k_rho_ + 2 / eta_) / (2 * gamma_ / (gamma_ + 1));
+    double temp = (-2 * (gamma__ + 1) + k_rho__ + 2 / eta__) / (2 * gamma__ / (gamma__ + 1));
     return temp;
 }
 
@@ -73,9 +92,9 @@ double Bubble::Delta(double lambda_c, double lambda_c_approx) {
 
 // Calculating R_sw
 double Bubble::R_sw(double vel, double numb, double k) {
-    double f_rho = pow((4 * gamma_ / (gamma_ + 1) * (gamma_ + 1)), 1 / (gamma_ - 1));
+    double f_rho = pow((4 * gamma__ / (gamma__ + 1) * (gamma__ + 1)), 1 / (gamma__ - 1));
     double time = 3600 * 24 * 365 * numb;
-    double temp = (gamma_ - 1) / (gamma_ + 1) * vel * f_rho * time * (3 * gamma_ / (3 * (gamma_ - 1) * eta_ + n_int_)) / (k_rho_ * k_rho_ * k_rho_);
+    double temp = (gamma__ - 1) / (gamma__ + 1) * vel * f_rho * time * (3 * gamma__ / (3 * (gamma__ - 1) * eta__ + n_int__)) / (k_rho__ * k_rho__ * k_rho__);
     return temp / au;
 }
 

@@ -4,8 +4,8 @@
 
 class Bubble {
     private:
-        double gamma_, k_rho_, n_int_;
-        double eta_ = (2 + n_int_) / (5 - k_rho_);
+        double gamma__, k_rho__, n_int__;
+        double eta__ = (2 + n_int__) / (5 - k_rho__);
 
     public:
         explicit Bubble(double gamma, double k_rho, double n_int);
