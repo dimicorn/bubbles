@@ -19,7 +19,7 @@ class Bubble(object):
             fv = (4 * g * v / ((g + 1) * x) - k - (1 - 1 / n) * (
                     ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) * rho * v / p - 2)) * (
                          ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) ** 2 * rho / p - 2 * g / (g + 1)) ** (-1)
-            fp = ((1 / n - 1) * v - (2 * v / (g + 1) - x) * fv) * ((g + 1) / ((g - 1) * rho)) # error
+            fp = ((1 / n - 1) * v - (2 * v / (g + 1) - x) * fv) * ((g + 1) / (g - 1) * rho) # error
             f_rho = ((-k * (g - 1) - 2 * (1 - 1 / n)) * (2 * v / (g + 1) - x) ** (-1) - 1 / p * fp) * (-rho / g)
             return fv, f_rho, fp
 

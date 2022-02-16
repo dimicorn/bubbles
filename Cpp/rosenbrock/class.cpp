@@ -59,7 +59,7 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
                 // Derivative of pressure
                 dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / (gamma_ - 1) * x[2]; // different 
                 // Derivative of density
-                dxdt[2] = x[2] / gamma_ * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + 1 / x[1] * dxdt[2]);
+                dxdt[2] = x[2] / gamma_ * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + 1 / x[1] * dxdt[1]);
             }
         };
         struct StiffSystemJacobi {
@@ -100,7 +100,7 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
         vector_type x(3, 1.0); // Size and initial conditions (expecting equal values)
         size_t num_of_steps = integrate_const(boost::numeric::odeint::make_dense_output<boost::numeric::odeint::rosenbrock4<double>>(1.0e-8, 1.0e-8),
                 std::make_pair(StiffSystem(), StiffSystemJacobi()),
-                x, 1.0, 0.9, -0.001, StreamingObserver(std::cout));
+                x, 1.0, 0.8584, -0.000001, StreamingObserver(std::cout));
         // output << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << std::endl);
         // std::clog << num_of_steps << std::endl;
         std::cout << LambdaApprox() << std::endl;

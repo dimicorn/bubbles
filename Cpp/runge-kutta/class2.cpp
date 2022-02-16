@@ -13,6 +13,10 @@
 
 typedef std::vector<double> state_type;
 
+double sqr(double x) {
+    return x * x;
+}
+
 Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
     gamma__(gamma), k_rho__(k_rho), n_int__(n_int), i_(i), j_(j), k_(k) {
         static double gamma_ = gamma__;
@@ -40,20 +44,23 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
         struct StiffSystem {
             void operator()(const state_type &x, state_type &dxdt, double t) {
                 // Derivative of velocity
-                dxdt[0] = ((4 * x[0] * gamma_ / (t * (gamma_ + 1)) - k_rho_ - (1 - 1 / eta_) * (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * x[0] - 2))) / (x[2] / x[1] * (gamma_ + 1) / (gamma_ - 1) * (2 * x[0] / (gamma_ + 1) - t) * (2 * x[0] / (gamma_ + 1) - t) - 2 * gamma_ / (gamma_ + 1));
+                dxdt[0] = ((4. * x[0] * gamma_ / (t * (gamma_ + 1.)) - k_rho_ -
+                (1. - 1. / eta_) * (x[2] / x[1] * (gamma_ + 1.) / (gamma_ - 1.) * (2. * x[0] / (gamma_ + 1.) - t) * x[0] - 2.))) /
+                (x[2] / x[1] * (gamma_ + 1.) / (gamma_ - 1.) * sqr((2. * x[0] / (gamma_ + 1.) - t)) - 2. * gamma_ / (gamma_ + 1.));
+
                 // Derivative of pressure
-                //dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / (gamma_ - 1) * x[2]; // different 
+                dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / (gamma_ - 1) * x[2]; // different 
                 // initial
-                dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / ((gamma_ - 1) * x[2]);
+                // dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / ((gamma_ - 1) * x[2]);
                 // Derivative of density
-                dxdt[2] = x[2] / gamma_ * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + 1 / x[1] * dxdt[2]);
+                dxdt[2] = x[2] / gamma_ * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + 1 / x[1] * dxdt[1]);
             }
         };
         state_type x(3, 1.0); // Size and initial conditions (expecting equal values, but not necessary)
-        boost::numeric::odeint::runge_kutta4<state_type> stepper;
+        boost::numeric::odeint::runge_kutta_dopri5<state_type> stepper;
         size_t num_of_steps = integrate_const(stepper, StiffSystem(), x,
-                1.0, 0.9, -0.001,
-                std::cout << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << std::endl);
+                1.0, 0.8584, -0.0001,
+                std::cout << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << std::endl);
         // std::clog << num_of_steps << std::endl;
         std::cout << LambdaApprox() << std::endl;
 };

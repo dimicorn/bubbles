@@ -23,6 +23,6 @@ int main(int argc, char **argv) {
         }
     }
     */
-    Bubble bubble(5.0 / 3.0, 0, 3, 0, 0, 0);
+    Bubble bubble(5.0 / 3.0, 0, 1, 0, 0, 0);
     return 0;
 }
