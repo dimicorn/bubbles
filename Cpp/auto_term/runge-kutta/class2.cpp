@@ -1,10 +1,8 @@
 #include "class2.h"
 #include "constants2.h"
 #include <string>
-//#include <cmath>
 #include <vector>
 #include <fstream>
-//#include <utility>
 #include <iostream>
 
 #include <boost/numeric/odeint.hpp>
@@ -49,20 +47,22 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
                 (x[2] / x[1] * (gamma_ + 1.) / (gamma_ - 1.) * sqr((2. * x[0] / (gamma_ + 1.) - t)) - 2. * gamma_ / (gamma_ + 1.));
 
                 // Derivative of pressure
-                dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / (gamma_ - 1) * x[2]; // different 
-
-                // initial
-                // dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / ((gamma_ - 1) * x[2]);
+                dxdt[1] = (-(1 - 1 / eta_) * x[0] - (2 * x[0] / (gamma_ + 1) - t) * dxdt[0]) * (gamma_ + 1) / (gamma_ - 1) * x[2];
 
                 // Derivative of density
                 dxdt[2] = x[2] / gamma_ * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + 1 / x[1] * dxdt[1]);
             }
         };
+        std::ofstream output;
+        output.open("data/gamma_" + std::to_string(gamma_) + "_k_rho_" + std::to_string(k_rho_) + "_n_int_" + std::to_string(n_int_) + ".dat");
+        output << "gamma =  " << gamma_ << " k_rho = " << k_rho_ << " n_int = " << n_int_ << "\n";
+        output << "lambda velocity pressure density\n";
         state_type x(3, 1.0); // Size and initial conditions (expecting equal values, but not necessary)
         boost::numeric::odeint::runge_kutta_dopri5<state_type> stepper;
         size_t num_of_steps = integrate_const(stepper, StiffSystem(), x,
                 1.0, LambdaApprox(), -0.0001,
-                std::cout  << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << "\n");
+                output << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << "\n");
+        output.close();
         // std::clog << num_of_steps << std::endl;
         // std::cout << LambdaApprox() << std::endl;
 };
