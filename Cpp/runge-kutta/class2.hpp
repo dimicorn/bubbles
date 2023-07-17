@@ -1,5 +1,5 @@
-#ifndef CLASS2_H
-#define CLASS2_H
+#ifndef CLASS2_HPP
+#define CLASS2_HPP
 class Bubble {
     private:
         double gamma__, k_rho__, n_int__;

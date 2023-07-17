@@ -1,5 +1,5 @@
-#include "class.h"
-#include "constants.h"
+#include "class.hpp"
+#include "constants.hpp"
 #include <string>
 #include <cmath>
 #include <vector>

@@ -1,5 +1,5 @@
-#include "class2.h"
-#include "constants2.h"
+#include "class2.hpp"
+#include "constants2.hpp"
 #include <string>
 #include <cmath>
 #include <vector>
@@ -60,7 +60,8 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
         boost::numeric::odeint::runge_kutta_dopri5<state_type> stepper;
         size_t num_of_steps = integrate_const(stepper, StiffSystem(), x,
                 1.0, 0.8584, -0.0001,
-                std::cout << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << std::endl);
+                std::cout << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " 
+                << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << std::endl);
         // std::clog << num_of_steps << std::endl;
         std::cout << LambdaApprox() << std::endl;
 };
@@ -72,7 +73,9 @@ double Bubble::CurveValue(double lambda_c) {
 
 // Approximation using eqn B8a
 double Bubble::LambdaApprox() {
-    double t = gamma__ * gamma__ * gamma__ + 12 * gamma__ * gamma__ + 8 * gamma__ + 1 - 0.5 * (gamma__ + 1) * (3 * gamma__ + 1) * k_rho__ - (gamma__ + 1) * (4 * gamma__ + 1) / eta__;
-    double u = 2 * gamma__ * gamma__ * gamma__ + 12 * gamma__ * gamma__ + 7 * gamma__ + 1 - 0.5 * (gamma__ + 1) * (3 * gamma__ + 1) * k_rho__ - (gamma__ + 1) * (4 * gamma__ + 1) / eta__;
+    double t = gamma__ * gamma__ * gamma__ + 12 * gamma__ * gamma__ + 8 * gamma__ + 1 - 
+    0.5 * (gamma__ + 1) * (3 * gamma__ + 1) * k_rho__ - (gamma__ + 1) * (4 * gamma__ + 1) / eta__;
+    double u = 2 * gamma__ * gamma__ * gamma__ + 12 * gamma__ * gamma__ + 
+    7 * gamma__ + 1 - 0.5 * (gamma__ + 1) * (3 * gamma__ + 1) * k_rho__ - (gamma__ + 1) * (4 * gamma__ + 1) / eta__;
     return t / u; 
 }

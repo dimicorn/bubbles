@@ -1,7 +1,7 @@
 #include <string>
 #include <fstream>
-#ifndef CLASS_H
-#define CLASS_H
+#ifndef CLASS_HPP
+#define CLASS_HPP
 
 class Bubble {
     private:
