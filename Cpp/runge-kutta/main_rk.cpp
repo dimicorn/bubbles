@@ -1,9 +1,9 @@
+#include "class_rk2.hpp"
 #include <iostream>
-#include "class2.hpp"
 #include <fstream>
 #include <vector>
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 	/*
     std::cout << "k_rho = 0, n_int = 1" << std::endl;
     Bubble bubble(5./3., 0, 1, 0, 0, 0); 
@@ -19,6 +19,8 @@ int main(int argc, char **argv) {
     std::cout << "----------------------------------------------" << std::endl;
     std::cout << "gamma = 2, k_rho = 0, n_int = 3" << std::endl;
 	*/
-    Bubble bubble4(2, 2, 1, 0, 0, 0);
+
+    Bubble bubble(2, 2, 1, 0, 0, 0);
+    
     return 0;
 }

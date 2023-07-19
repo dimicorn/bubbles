@@ -1,10 +1,11 @@
 #include <iostream>
 #include <fstream>
-#include "class.hpp"
+#include "class_r.hpp"
 #include <vector>
 
 int main(int argc, char **argv) {
-    std::vector<float> Gamma, K_rho, N_int;
+    std::vector<double> Gamma, K_rho, N_int;
+    
     // Test parameters
     for (int i = 0; i < 3; ++i) {
         Gamma.push_back(1 + (i + 1) * 0.05);
@@ -23,6 +24,8 @@ int main(int argc, char **argv) {
         }
     }
     */
-    Bubble bubble(5.0 / 3.0, 0, 1, 0, 0, 0);
+
+    Bubble bubble(2, 2, 1, 0, 0, 0);
+
     return 0;
 }

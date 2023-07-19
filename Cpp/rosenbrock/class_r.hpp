@@ -1,7 +1,7 @@
 #include <string>
 #include <fstream>
-#ifndef CLASS_HPP
-#define CLASS_HPP
+#ifndef CLASS_R_HPP
+#define CLASS_R_HPP
 
 class Bubble {
     private:
@@ -13,6 +13,7 @@ class Bubble {
         explicit Bubble(double gamma, double k_rho, double n_int, int i, int j, int k);
         double CurveValue(double lambda_c);
         double LambdaApprox();
+        /*
         double GradVel1();
         double GradVel2();
         double Delta(double lambda_c, double lambda_c_approx);
@@ -22,5 +23,6 @@ class Bubble {
         int Values();
         int Q_p();
         static void Observer();
+        */
 };
 #endif
