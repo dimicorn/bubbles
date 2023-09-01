@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include "class_r.hpp"
 #include <vector>
+
+#include "class_r.hpp"
 
 int main(int argc, char **argv) {
     std::vector<double> Gamma, K_rho, N_int;

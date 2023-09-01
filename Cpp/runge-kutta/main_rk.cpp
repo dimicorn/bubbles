@@ -1,7 +1,8 @@
-#include "class_rk2.hpp"
 #include <iostream>
 #include <fstream>
 #include <vector>
+
+#include "class_rk.hpp"
 
 int main(int argc, char** argv) {
 	/*

@@ -1,5 +1,7 @@
-#ifndef CLASS_RK2_HPP
-#define CLASS_RK2_HPP
+#include <string>
+#include <boost/phoenix/core.hpp>
+#ifndef CLASS_RK_HPP
+#define CLASS_RK_HPP
 
 class Bubble {
     private:
@@ -9,8 +11,9 @@ class Bubble {
 
     public:
         explicit Bubble(double gamma, double k_rho, double n_int, int i, int j, int l);
-        double CurveValue(double lambda_c);
+        auto CurveValue(const boost::phoenix::placeholders::arg2_type lambda);
         double LambdaApprox();
+        std::string Filename();
 };
 
 #endif

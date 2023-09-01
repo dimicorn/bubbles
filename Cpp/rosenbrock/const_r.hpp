@@ -5,7 +5,10 @@
 const double x_0 = 1.0;
 const double x_k = 0.7;
 
+// Integration step
 const double step = -0.0001;
+
+// Precision
 const double eps = 1.0e-8;
 
 /*
