@@ -23,5 +23,6 @@ int main(int argc, char** argv) {
 
     Bubble bubble(2, 2, 1, 0, 0, 0);
     
+    /* test*/
     return 0;
 }
