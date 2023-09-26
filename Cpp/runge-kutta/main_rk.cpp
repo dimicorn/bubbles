@@ -1,23 +1,8 @@
 #include "class_rk.hpp"
 
 int main(int argc, char** argv) {
-	/*
-    std::cout << "k_rho = 0, n_int = 1" << std::endl;
-    Bubble bubble(5./3., 0, 1, 0, 0, 0); 
-    std::cout << "----------------------------------------------" << std::endl;
-    std::cout << "k_rho = 1, n_int = 1" << std::endl;
-    Bubble bubble1(5./3., 1, 1, 0, 1, 0);
-    std::cout << "----------------------------------------------" << std::endl;
-    std::cout << "k_rho = 2, n_int = 1" << std::endl;
-    Bubble bubble2(5./3., 2, 1, 0, 2, 0);
-    std::cout << "----------------------------------------------" << std::endl;
-    std::cout << "k_rho = 1, n_int = 2" << std::endl;
-    Bubble bubble3(5./3., 1, 2, 0, 1, 1);
-    std::cout << "----------------------------------------------" << std::endl;
-    std::cout << "gamma = 2, k_rho = 0, n_int = 3" << std::endl;
-	*/
-
-    Bubble bubble(2.5, 2, 1);
+    Bubble bubble(1.4, 2, 1);
+	double lambda_n = 0.9;
 
 	std::string output_filename = bubble.Filename();
 
@@ -34,7 +19,10 @@ int main(int argc, char** argv) {
     }
     output.close();
 
-	std::cout << bubble.LambdaShockWind(lambda_c) << '\n';
+	double lambda_sw = bubble.LambdaShockWind(lambda_c, lambda_n);
+
+	printf("lambda_c = %lf\n", lambda_c);
+	printf("lambda_sw = %lf\n", lambda_sw);
 
     return 0;
 }

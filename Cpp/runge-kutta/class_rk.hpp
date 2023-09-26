@@ -47,7 +47,7 @@ class Bubble {
         double GradVelShock(double gamma_sa, double k_rho);
         double GradVelCon(double gamma_sa, double k_rho);
         */
-        double LambdaShockWind(double lambda_c, double numb_of_years = 1e4, double vel_in = 75000, double r_s = 0);
+        double LambdaShockWind(double lambda_c, double lambda_n = 1, double numb_of_years = 1e4, double vel_in = 75000, double r_s = 0);
 };
 
 #endif

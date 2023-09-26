@@ -98,13 +98,13 @@ std::string Bubble::Filename() {
 
 // Appendix B2
 // lambda_sw = R_s / R_sw (shocked wind)
-double Bubble::LambdaShockWind(double lambda_c, double numb_of_years, double vel_in, double r_s) {
+double Bubble::LambdaShockWind(double lambda_c, double lambda_n, double numb_of_years, double vel_in, double r_s) {
 	double gamma_sw = gamma; // For now it is true
 
     double f_rho = pow((4 * gamma_sw / sqr(gamma_sw + 1)), 1 / (gamma_sw - 1));
     double time = numb_of_years * year_in_sec;
 	// 1.165 *
-	double lambda_sw2 = (gamma_sw - 1) / (gamma_sw + 1) * f_rho / (sqr(lambda_c) * lambda_c * (3 * (gamma_sw -  1) * eta + n_int) / (3 * gamma_sw));
+	double lambda_sw2 = lambda_n * (gamma_sw - 1) / (gamma_sw + 1) * f_rho / (sqr(lambda_c) * lambda_c * (3 * (gamma_sw -  1) * eta + n_int) / (3 * gamma_sw));
 
 	return sqrt(lambda_sw2);
 
