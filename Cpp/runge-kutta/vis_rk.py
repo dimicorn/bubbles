@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import sys
 
 
-def FigTitle(filename: str)->str:
+def FigTitle(filename: str) -> str:
     # filename format example: gamma_2_k_rho_2_n_int_1.txt
     temp = filename.split('_')
     g = r"$\gamma=$" + temp[1]
