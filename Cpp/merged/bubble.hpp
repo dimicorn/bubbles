@@ -19,6 +19,9 @@ typedef std::vector<double> state_type;
 typedef boost::numeric::ublas::vector<double> vector_type;
 typedef boost::numeric::ublas::matrix<double> matrix_type;
 
+const std::string unknown_arg = "unknown argument: ";
+const std::string too_many_args = "too many arguments";
+
 // Starting and ending values of lambda
 const double x_0 = 1.0;
 const double x_c = 0.7;

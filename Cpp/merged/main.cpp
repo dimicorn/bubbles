@@ -1,10 +1,7 @@
 #include "bubble.hpp"
 
-const std::string unknown_arg = "unknown argument: ";
-const std::string too_many_args = "too many arguments";
-
-void solve() {
-	Bubble bubble(2, 2, 1, Methods::RUNGE_KUTTA);
+void solve(double gamma, double k_rho, double n_int, Methods m = Methods::RUNGE_KUTTA) {
+	Bubble bubble(gamma, k_rho, n_int, m);
     double lambda_n = 0.9;
 	
     std::string output_filename = bubble.Filename();
@@ -24,10 +21,10 @@ void solve() {
 
     double lambda_sw = bubble.LambdaShockWind(lambda_c, lambda_n);
 
-    printf("lambda_c = %lf\n", lambda_c);
-    printf("lambda_sw = %lf\n", lambda_sw);
+	std::cout << "lambda_c = " << lambda_c << '\n';
+	std::cout << "lambda_sw = " << lambda_sw << '\n';
 }
-
+/*
 void run(int argc, char** argv) {
 	if (argc == 1) {
 		// Runge-Kutta
@@ -36,7 +33,6 @@ void run(int argc, char** argv) {
 	} else if (argc == 2) {
 		if (!strcmp(argv[1], "-rk") || !strcmp(argv[1], "--runge-kutta")) {
 			// Runge-Kutta
-			// METHOD = Methods::RUNGE_KUTTA;
 			solve();
 		} else if (!strcmp(argv[1], "-r") || !strcmp(argv[1], "--rosenbrock")) {
 			// Rosenbrock
@@ -52,12 +48,20 @@ void run(int argc, char** argv) {
 		// Throw length error exception
 		throw std::length_error(too_many_args);
 	}
-
 }
-
+*/
 
 int main(int argc, char** argv) {
-	/*
+    int n = 2;
+	std::vector<double> Gamma(n), K_rho(n), N_int(n);
+
+    // initial range of gamma, k_rho, n_int
+    for (int i = 0; i < n; ++i) {
+        Gamma[i] = 2 + 0.1 * i;
+        K_rho[i] = 2 + 0.3 * i;
+        N_int[i] = 1 + 0.3 * i;
+    }
+
 	int size, rank;
 	if (MPI_Init(&argc, &argv) != MPI_SUCCESS) {
         MPI_Abort(MPI_COMM_WORLD, 1);
@@ -68,17 +72,104 @@ int main(int argc, char** argv) {
     if (MPI_Comm_rank(MPI_COMM_WORLD, &rank) != MPI_SUCCESS) {
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
-	*/
+	int i_beg, i_end;
+    i_beg = rank * n / size;
+    if (rank != size - 1) {
+        i_end = (rank + 1) * n / size;
+    } else {
+        i_end = n;
+    }
+	std::cout << size << '\n';
+	std::cout << "I work! rank = " << rank << '\n';
+	std::cout << i_beg << ' ' << i_end << '\n';
 	
 	try {
-		run(argc, argv);
+		if (argc == 1) {
+			// Runge-Kutta
+			// if (rank == size - 1) {
+				for (int i = i_beg; i < i_end; ++i) {
+					for (int j = 0; j < n; ++j) {
+						for (int k = 0; k < n; ++k) {
+							solve(Gamma[i], K_rho[j], N_int[k], Methods::RUNGE_KUTTA);
+						}
+					}
+				}
+			/*
+			} else {
+				for (int i = i_beg; i < i_end; ++i) {
+					for (int j = 0; j < n; ++j) {
+						for (int k = 0; k < n; ++k) {
+							solve(Gamma[i], K_rho[j], N_int[k], Methods::RUNGE_KUTTA);
+						}
+					}	
+				}
+			}
+			*/
+
+		} else if (argc == 2) {
+			if (!strcmp(argv[1], "-rk") || !strcmp(argv[1], "--runge-kutta")) {
+				// Runge-Kutta
+				// if (rank == size - 1) {
+					for (int i = i_beg; i < i_end; ++i) {
+						for (int j = 0; j < n; ++j) {
+							for (int k = 0; k < n; ++k) {
+								solve(Gamma[i], K_rho[j], N_int[k], Methods::RUNGE_KUTTA);
+							}
+						}	
+					}
+				/*
+				} else {
+					for (int i = i_beg; i < i_end; ++i) {
+						for (int j = 0; j < n; ++j) {
+							for (int k = 0; k < n; ++k) {
+								solve(Gamma[i], K_rho[j], N_int[k], Methods::RUNGE_KUTTA);
+							}
+						}	
+					}
+				}
+				*/
+			} else if (!strcmp(argv[1], "-r") || !strcmp(argv[1], "--rosenbrock")) {
+				// Rosenbrock
+				// if (rank == size - 1) {
+					for (int i = i_beg; i < i_end; ++i) {
+						for (int j = 0; j < n; ++j) {
+							for (int k = 0; k < n; ++k) {
+								Bubble bubble(Gamma[i], K_rho[j], N_int[k], Methods::ROSENBROCK);
+							}
+						}
+					}
+				/*
+				} else {
+					for (int i = i_beg; i < i_end; ++i) {
+						for (int j = 0; j < n; ++j) {
+							for (int k = 0; k < n; ++k) {
+								Bubble bubble(Gamma[i], K_rho[j], N_int[k], Methods::ROSENBROCK);
+							}
+						}
+					}
+				}
+				*/
+			} else if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
+				// Help
+			} else {
+				// Throw invalid argument exception
+				throw std::invalid_argument(unknown_arg + "'" + argv[1] + "'");
+			}
+		} else {
+			// Throw length error exception
+			throw std::length_error(too_many_args);
+		}
 	} catch (std::invalid_argument &e) {
 		std::cerr << e.what() << '\n';	
+		MPI_Finalize();
 		return -1;
 	} catch (std::length_error &e) {
 		std::cerr << e.what() << '\n';	
+		MPI_Finalize();
 		return -1;
 	}
+
+	MPI_Finalize();
 
     return 0;
 }
