@@ -19,7 +19,7 @@ def parse(file_name: str) -> tuple[list, list, list, list, list]:
     return (coord, density, velocity, pressure, int_energy)
 
 def main():
-    if sys.argv:
+    if len(sys.argv) == 1:
         print('No input file was given!')
         exit(0)
     
