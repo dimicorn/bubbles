@@ -1,5 +1,6 @@
-#ifndef CLASS2_H
-#define CLASS2_H
+#ifndef CLASS_RK_HPP
+#define CLASS_RK_HPP
+
 class Bubble {
     private:
         double gamma__, k_rho__, n_int__;
@@ -11,4 +12,5 @@ class Bubble {
         double CurveValue(double lambda_c);
         double LambdaApprox();
 };
+
 #endif

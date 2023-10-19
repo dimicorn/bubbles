@@ -2,6 +2,7 @@
 out
 *.out
 *.ini
+*.txt
 TODO
 .vscode
 __pycache__

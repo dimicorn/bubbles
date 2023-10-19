@@ -1,6 +1,6 @@
 from scipy import integrate
 import numpy as np
-from constants import*
+from constants import *
 
 
 class Bubble(object):
@@ -17,10 +17,12 @@ class Bubble(object):
             n1 = self.n_int
             n = (2 + n1) / (5 - k)
             fv = (4 * g * v / ((g + 1) * x) - k - (1 - 1 / n) * (
-                    ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) * rho * v / p - 2)) * (
-                         ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) ** 2 * rho / p - 2 * g / (g + 1)) ** (-1)
-            fp = ((1 / n - 1) * v - (2 * v / (g + 1) - x) * fv) * ((g + 1) / (g - 1) * rho) # error
-            f_rho = ((-k * (g - 1) - 2 * (1 - 1 / n)) * (2 * v / (g + 1) - x) ** (-1) - 1 / p * fp) * (-rho / g)
+                ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) * rho * v / p - 2)) * (
+                ((g + 1) / (g - 1)) * (2 * v / (g + 1) - x) ** 2 * rho / p - 2 * g / (g + 1)) ** (-1)
+            fp = ((1 / n - 1) * v - (2 * v / (g + 1) - x) * fv) * \
+                ((g + 1) / (g - 1) * rho)  # error
+            f_rho = ((-k * (g - 1) - 2 * (1 - 1 / n)) *
+                     (2 * v / (g + 1) - x) ** (-1) - 1 / p * fp) * (-rho / g)
             return fv, f_rho, fp
 
         # Solutions for the system
@@ -29,7 +31,8 @@ class Bubble(object):
         self.velocity, self.density, self.pressure = sol.y
         self.lambda_c = sol.t
         self.slope_x = np.linspace(x0, x_k, 1000)
-        self.slope_y = np.array([(self.gamma + 1) / 2 * self.slope_x[e] for e in range(1000)])
+        self.slope_y = np.array(
+            [(self.gamma + 1) / 2 * self.slope_x[e] for e in range(1000)])
         self.dist = -1
         self.intersect = False
         x1, y1, x2, y2 = self.lambda_c, self.velocity, self.slope_x, self.slope_y
@@ -91,8 +94,10 @@ class Bubble(object):
     # Approximation using eqn B8a
     def lambda2(self, x, k_rho):
         w = self.eta()
-        t = x ** 3 + 12 * x ** 2 + 8 * x + 1 - 0.5 * (x + 1) * (3 * x + 1) * k_rho - (x + 1) * (4 * x + 1) / w
-        u = 2 * x ** 3 + 12 * x ** 2 + 7 * x + 1 - 0.5 * (x + 1) * (3 * x + 1) * k_rho - (x + 1) * (4 * x + 1) / w
+        t = x ** 3 + 12 * x ** 2 + 8 * x + 1 - 0.5 * \
+            (x + 1) * (3 * x + 1) * k_rho - (x + 1) * (4 * x + 1) / w
+        u = 2 * x ** 3 + 12 * x ** 2 + 7 * x + 1 - 0.5 * \
+            (x + 1) * (3 * x + 1) * k_rho - (x + 1) * (4 * x + 1) / w
         return t / u
 
     # Gradient of velocity, r = R_s
@@ -119,7 +124,8 @@ class Bubble(object):
         t_y = 3600 * 24 * 365
         t = numb * t_y
         n = (2 + self.n_int) / (5 - self.k_rho)
-        r = (g - 1) / (g + 1) * v * f_rho * t * (3 * g / (3 * (g - 1) * n + self.n_int)) / k ** 3
+        r = (g - 1) / (g + 1) * v * f_rho * t * \
+            (3 * g / (3 * (g - 1) * n + self.n_int)) / k ** 3
         return r / au
 
     # Adding all the necessary data to the excel table
@@ -137,7 +143,8 @@ class Bubble(object):
             # This works
             sh1['G' + str(count)].value = self.lambda_c[-1]
             sh1['H' + str(count)].value = self.velocity[-1]
-            sh1['I' + str(count)].value = self.v2(self.gamma, self.lambda_c[-1])
+            sh1['I' + str(count)].value = self.v2(self.gamma,
+                                                  self.lambda_c[-1])
             sh1['J' + str(count)].value = l2
             sh1['K' + str(count)].value = self.dv1(self.gamma, self.k_rho)
             sh1['L' + str(count)].value = self.dv2(self.gamma, self.k_rho)

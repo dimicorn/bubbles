@@ -1,5 +1,5 @@
-#include "class2.h"
-#include "constants2.h"
+#include "class_rk.hpp"
+#include "const_rk.hpp"
 #include <string>
 #include <vector>
 #include <fstream>
@@ -21,6 +21,7 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
         static double k_rho_ = k_rho__;
         static double n_int_ = n_int__;
         static double eta_ = eta__;
+
         // Not very pretty, but works fine
         if (gamma_ != gamma__) {
             double temp = gamma__ - gamma_;
@@ -39,8 +40,9 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
             eta_ += temp;
         }
 
-        struct StiffSystem {
+        struct System {
             void operator()(const state_type &x, state_type &dxdt, double t) {
+
                 // Derivative of velocity
                 dxdt[0] = ((4. * x[0] * gamma_ / (t * (gamma_ + 1.)) - k_rho_ -
                 (1. - 1. / eta_) * (x[2] / x[1] * (gamma_ + 1.) / (gamma_ - 1.) * (2. * x[0] / (gamma_ + 1.) - t) * x[0] - 2.))) /
@@ -53,23 +55,30 @@ Bubble::Bubble(double gamma, double k_rho, double n_int, int i, int j, int k):
                 dxdt[2] = x[2] / gamma_ * ((k_rho_ * (gamma_ - 1) + 2 * (1 - 1 / eta_)) / (2 * x[0] / (gamma_ + 1) - t) + 1 / x[1] * dxdt[1]);
             }
         };
+
         std::ofstream output;
         output.open("data/gamma_" + std::to_string(gamma_) + "_k_rho_" + std::to_string(k_rho_) + "_n_int_" + std::to_string(n_int_) + ".dat");
-        output << "gamma =  " << gamma_ << " k_rho = " << k_rho_ << " n_int = " << n_int_ << "\n";
+        output << "gamma =  " << gamma_ << " k_rho = " << k_rho_ << " n_int = " << n_int_ << '\n';
         output << "lambda velocity pressure density\n";
+
         state_type x(3, 1.0); // Size and initial conditions (expecting equal values, but not necessary)
+
         boost::numeric::odeint::runge_kutta_dopri5<state_type> stepper;
-        size_t num_of_steps = integrate_const(stepper, StiffSystem(), x,
-                1.0, LambdaApprox(), -0.0001,
-                output << boost::phoenix::arg_names::arg2 << " " << boost::phoenix::arg_names::arg1[0] << " " << boost::phoenix::arg_names::arg1[1] << " " << boost::phoenix::arg_names::arg1[2] << "\n");
+
+        size_t num_of_steps = integrate_const(stepper, System(), x,
+                lambda_0, lambda_c, step,
+                output << boost::phoenix::arg_names::arg2 << ' ' << boost::phoenix::arg_names::arg1[0] 
+                << ' ' << boost::phoenix::arg_names::arg1[1] << ' ' << boost::phoenix::arg_names::arg1[2] 
+                << LambdaApprox() << '\n');
         output.close();
+
         // std::clog << num_of_steps << std::endl;
         // std::cout << LambdaApprox() << std::endl;
 };
 
 // Value of the curve at lambda_c
-double Bubble::CurveValue(double lambda_c) {
-    return (gamma__ + 1) / 2 * lambda_c;
+double Bubble::CurveValue(double lambda) {
+    return (gamma__ + 1) / 2 * lambda;
 }
 
 // Approximation using eqn B8a

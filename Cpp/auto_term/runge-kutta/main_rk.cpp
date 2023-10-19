@@ -1,5 +1,5 @@
 #include <iostream>
-#include "class2.h"
+#include "class_rk.hpp"
 #include <fstream>
 #include <vector>
 #include "mpi.h"
@@ -11,8 +11,9 @@ void vectorize(std::vector<double> v, double beg, double end, double step) {
     }
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char** argv) {
     std::vector<double> Gamma, K_rho, N_int;
+    
     // initial range of gamma, k_rho, n_int
     int n = 12;
     for (int i = 0; i <= n; ++i) {
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]) {
     } else {
         i_end = n;
     }
-    std::cout << "I work!" << rank << "\n";
+    std::cout << "I work!" << rank << '\n';
     if (rank == size - 1) {
         for (int i = i_beg; i <= i_end; ++i) {
             for (int j = 0; j < K_rho.size(); ++j) {
