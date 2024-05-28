@@ -3,8 +3,9 @@
 void RiemannSolver::starpu(double &p, double &u, const double &mpa) {
     double change, fl, fld, fr, frd, pold, pstart;
     double udiff;
-    double tolpre = 1.0e-6;
-    int nriter = 20;
+    double tolpre = 1.0e-8;
+    int nriter = 200; 
+    // int nriter = 20; 
 
     guessp(pstart);
     pold = pstart;
