@@ -1,0 +1,14 @@
+.DS_Store
+out
+*.out
+*.ini
+*.txt
+TODO
+.vscode
+__pycache__
+.idea
+FIXME
+data
+figures
+test
+shang/
